@@ -1,377 +1,322 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Skyline Scanner</title>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <style>
-    body{
-      font-family: Arial, sans-serif;
-      text-align:center;
-      background:#f5f7fa;
-      padding:20px;
-      margin:0;
-      color:#111;
-    }
-    h1{
-      font-size:28px;
-      margin:16px 0 18px;
-    }
-    .btn{
-      background:#123f8c;
-      color:#fff;
-      border:none;
-      border-radius:14px;
-      padding:14px 22px;
-      font-size:18px;
-      margin:8px;
-      cursor:pointer;
-    }
-    #reader{
-      width:100%;
-      max-width:420px;
-      margin:20px auto;
-      background:#fff;
-      border-radius:16px;
-      overflow:hidden;
-      box-shadow:0 2px 10px rgba(0,0,0,.08);
-    }
-    #result{
-      max-width:420px;
-      margin:16px auto 0;
-      background:#fff;
-      border-radius:14px;
-      padding:16px;
-      text-align:left;
-      word-break:break-word;
-      box-shadow:0 2px 10px rgba(0,0,0,.08);
-      font-size:16px;
-      line-height:1.6;
-    }
-    .ok{color:#0a7a35;font-weight:bold;}
-    .err{color:#b00020;font-weight:bold;}
-    .muted{color:#666;font-size:13px;}
-    .row{margin-bottom:4px;}
-    .hr{border-top:1px solid #ddd;margin:12px 0;}
-  </style>
-</head>
-<body>
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbwXPMj_QZdNFbKSaL69xqXoH7iXVaZeO5hRgWMTbYoSXm1T-AYMrvajOAPtt9evg40sfA/exec";
 
-  <h1>📦 Skyline Scanner</h1>
+  let scanner = null;
+  let lastText = "";
+  let lastScanAt = 0;
+  let isProcessing = false;
+  const DUPLICATE_WINDOW_MS = 8000; // กันซ้ำ 8 วิ
 
-  <button class="btn" onclick="startScan()">📷 เปิดกล้อง</button>
-  <button class="btn" onclick="stopScan()">⛔ หยุด</button>
+  function setResult(html) {
+    document.getElementById("result").innerHTML = html;
+  }
 
-  <div id="reader"></div>
+  function escapeHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 
-  <div id="result">รอการสแกน...</div>
+  function cleanScanText(text) {
+    if (!text) return "";
+    return String(text)
+      .replace(/[^\x20-\x7E]/g, "")
+      .replace(/\s+/g, "")
+      .trim()
+      .toUpperCase();
+  }
 
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwXPMj_QZdNFbKSaL69xqXoH7iXVaZeO5hRgWMTbYoSXm1T-AYMrvajOAPtt9evg40sfA/exec";
+  function parseGS1(raw) {
+    const txt = cleanScanText(raw);
+    const out = {
+      raw: txt,
+      gtin: "",
+      lot: "",
+      sn: "",
+      mfgDate: ""
+    };
 
-    let scanner = null;
-    let lastText = "";
-    let lastTime = 0;
+    if (!txt) return out;
 
-    function setResult(html) {
-      document.getElementById("result").innerHTML = html;
+    const idx01 = txt.indexOf("01");
+    if (idx01 !== -1 && txt.length >= idx01 + 16) {
+      const maybeGTIN = txt.slice(idx01 + 2, idx01 + 16);
+      if (/^\d{14}$/.test(maybeGTIN)) out.gtin = maybeGTIN;
     }
 
-    function escapeHtml(str) {
-      return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+    const idx11 = txt.indexOf("11");
+    if (idx11 !== -1 && txt.length >= idx11 + 8) {
+      const d = txt.slice(idx11 + 2, idx11 + 8);
+      if (/^\d{6}$/.test(d)) {
+        out.mfgDate = `20${d.slice(0,2)}-${d.slice(2,4)}-${d.slice(4,6)}`;
+      }
     }
 
-    function cleanScanText(text) {
-      if (!text) return "";
-      return String(text)
-        .replace(/[^\x20-\x7E]/g, "")   // ตัดอักขระแปลก ๆ
-        .replace(/\s+/g, "")
-        .trim()
-        .toUpperCase();
+    const idx21 = txt.indexOf("21");
+    const idx10 = txt.indexOf("10");
+
+    if (idx21 !== -1 && idx10 !== -1 && idx21 < idx10) {
+      out.sn = txt.slice(idx21 + 2, idx10);
+    } else if (idx21 !== -1) {
+      out.sn = txt.slice(idx21 + 2);
     }
 
-    function parseGS1(raw) {
-      const txt = cleanScanText(raw);
-      const out = {
-        raw: txt,
-        gtin: "",
-        lot: "",
-        sn: "",
-        mfgDate: ""
+    if (idx10 !== -1) {
+      out.lot = txt.slice(idx10 + 2);
+    }
+
+    if (!out.sn && /^[A-Z0-9-]{6,}$/.test(txt) && !txt.startsWith("01")) {
+      out.sn = txt;
+    }
+
+    return out;
+  }
+
+  function detectProduct(text) {
+    const t = cleanScanText(text);
+
+    if (t.includes("NM5")) {
+      return {
+        type: "mask",
+        name: "Beyond EaseFit NM5",
+        brand: "Hunan Beyond",
+        model: "EaseFit NM5"
       };
-
-      if (!txt) return out;
-
-      // (01) GTIN 14 หลัก
-      const idx01 = txt.indexOf("01");
-      if (idx01 !== -1 && txt.length >= idx01 + 16) {
-        const maybeGTIN = txt.slice(idx01 + 2, idx01 + 16);
-        if (/^\d{14}$/.test(maybeGTIN)) out.gtin = maybeGTIN;
-      }
-
-      // (11) YYMMDD
-      const idx11 = txt.indexOf("11");
-      if (idx11 !== -1 && txt.length >= idx11 + 8) {
-        const d = txt.slice(idx11 + 2, idx11 + 8);
-        if (/^\d{6}$/.test(d)) {
-          out.mfgDate = `20${d.slice(0,2)}-${d.slice(2,4)}-${d.slice(4,6)}`;
-        }
-      }
-
-      // (21) Serial มักอยู่ก่อน (10) LOT
-      const idx21 = txt.indexOf("21");
-      const idx10 = txt.indexOf("10");
-
-      if (idx21 !== -1 && idx10 !== -1 && idx21 < idx10) {
-        out.sn = txt.slice(idx21 + 2, idx10);
-      } else if (idx21 !== -1) {
-        out.sn = txt.slice(idx21 + 2);
-      }
-
-      if (idx10 !== -1) {
-        out.lot = txt.slice(idx10 + 2);
-      }
-
-      // fallback ถ้าไม่ได้ SN/LOT จาก GS1
-      if (!out.sn && /^[A-Z0-9-]{6,}$/.test(txt) && !txt.startsWith("01")) {
-        out.sn = txt;
-      }
-
-      return out;
     }
 
-    function detectProduct(text) {
-      const t = cleanScanText(text);
+    if (t.includes("PMI")) {
+      return {
+        type: "mask",
+        name: "Beyond EaseFit PMI",
+        brand: "Hunan Beyond",
+        model: "EaseFit PMI"
+      };
+    }
 
-      // MASK
-      if (t.includes("NM5")) {
-        return {
-          type: "mask",
-          name: "Beyond EaseFit NM5",
-          brand: "Hunan Beyond",
-          model: "EaseFit NM5"
-        };
-      }
+    if (t.includes("WISP") || t.includes("606959006829") || t.includes("00606959006829")) {
+      return {
+        type: "mask",
+        name: "Philips Wisp Mask Fabric",
+        brand: "Philips Respironics",
+        model: "Wisp"
+      };
+    }
 
-      if (t.includes("PMI")) {
-        return {
-          type: "mask",
-          name: "Beyond EaseFit PMI",
-          brand: "Hunan Beyond",
-          model: "EaseFit PMI"
-        };
-      }
+    if (t.includes("WIZARD") || t.includes("04719893347319") || t.includes("SM06001")) {
+      return {
+        type: "mask",
+        name: "WiZARD 510 Nasal Mask",
+        brand: "Wellell",
+        model: "WiZARD 510"
+      };
+    }
 
-      if (t.includes("WISP") || t.includes("606959006829") || t.includes("00606959006829")) {
-        return {
-          type: "mask",
-          name: "Philips Wisp Mask Fabric",
-          brand: "Philips Respironics",
-          model: "Wisp"
-        };
-      }
+    if (t.includes("SPO2") || t.includes("RESHOPE") || t.includes("RESFREE")) {
+      return {
+        type: "accessory",
+        name: "SpO2 Kit",
+        brand: "Hunan Beyond",
+        model: "ResFree / ResHope"
+      };
+    }
 
-      if (t.includes("WIZARD") || t.includes("04719893347319") || t.includes("SM06001")) {
-        return {
-          type: "mask",
-          name: "WiZARD 510 Nasal Mask",
-          brand: "Wellell",
-          model: "WiZARD 510"
-        };
-      }
-
-      // ACCESSORY
-      if (t.includes("SPO2") || t.includes("RESHOPE") || t.includes("RESFREE")) {
-        return {
-          type: "accessory",
-          name: "SpO2 Kit",
-          brand: "Hunan Beyond",
-          model: "ResFree / ResHope"
-        };
-      }
-
-      // DEVICE
-      if (t.includes("CADL") || t.includes("R20") || t.includes("R-20I")) {
-        return {
-          type: "device",
-          name: "Beyond R-20i BPAP",
-          brand: "Hunan Beyond",
-          model: "R-20i"
-        };
-      }
-
-      if (t.includes("XTAUTO") || t.includes("XT AUTO") || t.includes("04713025000073")) {
-        return {
-          type: "device",
-          name: "APEX XT Auto",
-          brand: "APEX Medical",
-          model: "XT Auto"
-        };
-      }
-
-      if (t.includes("04719893347081")) {
-        return {
-          type: "device",
-          name: "APEX iX Auto + Humidifier",
-          brand: "APEX Medical",
-          model: "iX Auto + Humidifier"
-        };
-      }
-
-      if (t.includes("04713025000400")) {
-        return {
-          type: "device",
-          name: "APEX iX Auto",
-          brand: "APEX Medical",
-          model: "iX Auto"
-        };
-      }
-
-      if (t.includes("04713025000226")) {
-        return {
-          type: "device",
-          name: "APEX iX Auto Humidifier",
-          brand: "APEX Medical",
-          model: "iX Auto Humidifier"
-        };
-      }
-
+    if (t.includes("CADL") || t.includes("R20") || t.includes("R-20I")) {
       return {
         type: "device",
-        name: "Auto Scan",
-        brand: "Auto",
-        model: "Auto"
+        name: "Beyond R-20i CPAP",
+        brand: "Hunan Beyond",
+        model: "R-20i"
       };
     }
 
-    function buildPayload(decodedText) {
-      const cleaned = cleanScanText(decodedText);
-      const gs1 = parseGS1(cleaned);
-      const p = detectProduct(cleaned);
-
-      // ส่ง field ให้ครบตาม Apps Script
-      const payload = {
-        action: "in",
-        type: p.type,
-        name: p.name,
-        brand: p.brand,
-        model: p.model,
-        sn: "",
-        lot: "",
-        gtin: gs1.gtin || "",
-        mfgDate: gs1.mfgDate || "",
-        expiry: "",
-        location: "scan",
-        user: "github-scanner",
-        note: cleaned
+    if (t.includes("XTAUTO") || t.includes("XT AUTO") || t.includes("04713025000073")) {
+      return {
+        type: "device",
+        name: "APEX XT Auto",
+        brand: "APEX Medical",
+        model: "XT Auto"
       };
-
-      if (p.type === "device") {
-        payload.sn = gs1.sn || cleaned;
-        payload.lot = gs1.lot || "";
-      } else if (p.type === "mask") {
-        payload.lot = gs1.lot || cleaned;
-      } else if (p.type === "accessory") {
-        payload.lot = gs1.lot || cleaned;
-      }
-
-      return { payload, gs1, product: p, cleaned };
     }
 
-    async function sendToSheet(decodedText) {
-      const { payload, gs1, product, cleaned } = buildPayload(decodedText);
-
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const txt = await res.text();
-
-      setResult(`
-        <div class="ok">สแกนได้สำเร็จ</div>
-        <div class="row"><b>Raw:</b> ${escapeHtml(cleaned)}</div>
-        <div class="row"><b>ประเภท:</b> ${escapeHtml(product.type)}</div>
-        <div class="row"><b>ชื่อ:</b> ${escapeHtml(product.name)}</div>
-        <div class="row"><b>แบรนด์:</b> ${escapeHtml(product.brand)}</div>
-        <div class="row"><b>รุ่น:</b> ${escapeHtml(product.model)}</div>
-        <div class="row"><b>GTIN:</b> ${escapeHtml(gs1.gtin || "-")}</div>
-        <div class="row"><b>SN:</b> ${escapeHtml(payload.sn || "-")}</div>
-        <div class="row"><b>LOT:</b> ${escapeHtml(payload.lot || "-")}</div>
-        <div class="row"><b>MFG:</b> ${escapeHtml(gs1.mfgDate || "-")}</div>
-        <div class="hr"></div>
-        <div>ส่งเข้า Apps Script แล้ว</div>
-        <div class="muted">${escapeHtml(txt)}</div>
-      `);
+    if (t.includes("04719893347081")) {
+      return {
+        type: "device",
+        name: "APEX iX Auto + Humidifier",
+        brand: "APEX Medical",
+        model: "iX Auto + Humidifier"
+      };
     }
 
-    async function startScan() {
-      if (scanner) return;
+    if (t.includes("04713025000400")) {
+      return {
+        type: "device",
+        name: "APEX iX Auto",
+        brand: "APEX Medical",
+        model: "iX Auto"
+      };
+    }
 
-      scanner = new Html5Qrcode("reader");
+    if (t.includes("04713025000226")) {
+      return {
+        type: "device",
+        name: "APEX iX Auto Humidifier",
+        brand: "APEX Medical",
+        model: "iX Auto Humidifier"
+      };
+    }
 
-      try {
-        await scanner.start(
-          { facingMode: { exact: "environment" } },
-          {
-            fps: 10,
-            qrbox: { width: 280, height: 280 },
-            rememberLastUsedCamera: true,
-            aspectRatio: 1.0
-          },
-          async (decodedText) => {
-            const now = Date.now();
-            const cleaned = cleanScanText(decodedText);
+    return {
+      type: "device",
+      name: "Auto Scan",
+      brand: "Auto",
+      model: "Auto"
+    };
+  }
 
-            if (!cleaned) return;
-            if (cleaned === lastText && now - lastTime < 2000) return;
+  function buildPayload(decodedText) {
+    const cleaned = cleanScanText(decodedText);
+    const gs1 = parseGS1(cleaned);
+    const p = detectProduct(cleaned);
 
-            lastText = cleaned;
-            lastTime = now;
+    const payload = {
+      action: "in",
+      type: p.type,
+      name: p.name,
+      brand: p.brand,
+      model: p.model,
+      sn: "",
+      lot: "",
+      gtin: gs1.gtin || "",
+      mfgDate: gs1.mfgDate || "",
+      expiry: "",
+      location: "scan",
+      user: "github-scanner",
+      note: cleaned
+    };
 
-            navigator.vibrate && navigator.vibrate(100);
+    if (p.type === "device") {
+      payload.sn = gs1.sn || cleaned;
+      payload.lot = gs1.lot || "";
+    } else if (p.type === "mask") {
+      payload.lot = gs1.lot || cleaned;
+    } else if (p.type === "accessory") {
+      payload.lot = gs1.lot || cleaned;
+    }
 
-            setResult(`<div class="ok">กำลังส่งข้อมูล...</div><br>${escapeHtml(cleaned)}`);
+    return { payload, gs1, product: p, cleaned };
+  }
 
-            try {
-              await sendToSheet(cleaned);
-            } catch (e) {
-              setResult(`
-                <div class="err">สแกนได้ แต่ส่งเข้า Apps Script ไม่สำเร็จ</div>
-                <div class="row"><b>Raw:</b> ${escapeHtml(cleaned)}</div>
-                <div class="hr"></div>
-                <div class="muted">${escapeHtml(e)}</div>
-              `);
-            }
-          },
-          () => {
-            // ไม่ต้องแสดง error ทุก frame
-          }
-        );
-      } catch (err) {
-        setResult(`<div class="err">เปิดกล้องไม่ได้</div><br>${escapeHtml(err)}`);
+  async function sendToSheet(decodedText) {
+    const { payload, gs1, product, cleaned } = buildPayload(decodedText);
+
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain;charset=utf-8"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const txt = await res.text();
+
+    setResult(`
+      <div class="ok">สแกนได้สำเร็จ</div>
+      <div><b>Raw:</b> ${escapeHtml(cleaned)}</div>
+      <div><b>ประเภท:</b> ${escapeHtml(product.type)}</div>
+      <div><b>ชื่อ:</b> ${escapeHtml(product.name)}</div>
+      <div><b>แบรนด์:</b> ${escapeHtml(product.brand)}</div>
+      <div><b>รุ่น:</b> ${escapeHtml(product.model)}</div>
+      <div><b>GTIN:</b> ${escapeHtml(gs1.gtin || "-")}</div>
+      <div><b>SN:</b> ${escapeHtml(payload.sn || "-")}</div>
+      <div><b>LOT:</b> ${escapeHtml(payload.lot || "-")}</div>
+      <div><b>MFG:</b> ${escapeHtml(gs1.mfgDate || "-")}</div>
+      <hr>
+      <div>ส่งเข้า Apps Script แล้ว</div>
+      <div style="font-size:14px;color:#666;">${escapeHtml(txt)}</div>
+      <div style="margin-top:10px;color:#0a7a35;"><b>กด “เปิดกล้อง” เพื่อสแกนชิ้นถัดไป</b></div>
+    `);
+  }
+
+  async function handleDecoded(decodedText) {
+    const cleaned = cleanScanText(decodedText);
+    if (!cleaned) return;
+
+    const now = Date.now();
+
+    // 1) ถ้ากำลังส่งอยู่ ไม่รับซ้ำ
+    if (isProcessing) return;
+
+    // 2) ถ้าค่าเดิม ภายในช่วงเวลาที่กำหนด ไม่รับซ้ำ
+    if (cleaned === lastText && (now - lastScanAt) < DUPLICATE_WINDOW_MS) {
+      return;
+    }
+
+    isProcessing = true;
+    lastText = cleaned;
+    lastScanAt = now;
+
+    try {
+      navigator.vibrate && navigator.vibrate(100);
+
+      // 3) หยุดกล้องทันทีหลังจับได้ 1 ครั้ง
+      if (scanner) {
+        try {
+          await scanner.stop();
+          await scanner.clear();
+        } catch (e) {}
         scanner = null;
       }
-    }
 
-    async function stopScan() {
-      if (!scanner) return;
-      try {
-        await scanner.stop();
-        await scanner.clear();
-      } catch (e) {}
-      scanner = null;
-      setResult("หยุดกล้องแล้ว");
+      setResult(`<div class="ok">กำลังส่งข้อมูล...</div><br>${escapeHtml(cleaned)}`);
+      await sendToSheet(cleaned);
+
+    } catch (e) {
+      setResult(`
+        <div class="err">สแกนได้ แต่ส่งเข้า Apps Script ไม่สำเร็จ</div>
+        <div><b>Raw:</b> ${escapeHtml(cleaned)}</div>
+        <hr>
+        <div style="font-size:14px;color:#666;">${escapeHtml(e)}</div>
+      `);
+    } finally {
+      isProcessing = false;
     }
-  </script>
-</body>
-</html>
+  }
+
+  async function startScan() {
+    if (scanner || isProcessing) return;
+
+    scanner = new Html5Qrcode("reader");
+
+    try {
+      await scanner.start(
+        { facingMode: { exact: "environment" } },
+        {
+          fps: 10,
+          qrbox: { width: 280, height: 280 },
+          rememberLastUsedCamera: true,
+          aspectRatio: 1.0
+        },
+        async (decodedText) => {
+          await handleDecoded(decodedText);
+        },
+        () => {}
+      );
+    } catch (err) {
+      setResult(`<div class="err">เปิดกล้องไม่ได้</div><br>${escapeHtml(err)}`);
+      scanner = null;
+    }
+  }
+
+  async function stopScan() {
+    if (!scanner) return;
+    try {
+      await scanner.stop();
+      await scanner.clear();
+    } catch (e) {}
+    scanner = null;
+    setResult("หยุดกล้องแล้ว");
+  }
+</script>
