@@ -39,20 +39,31 @@ button {
 <button onclick="startScan()">📷 เปิดกล้อง</button>
 <button onclick="stopScan()">⛔ หยุด</button>
 
-<video id="video"></video>
+<video id="video" autoplay muted playsinline></video>
 
 <script>
-let codeReader;
-let controls;
+let codeReader = null;
+let controls = null;
 
 async function startScan() {
   if (codeReader) return;
 
-  codeReader = new ZXing.BrowserMultiFormatReader();
-
   try {
+    codeReader = new ZXing.BrowserMultiFormatReader();
+
+    // ดึง list กล้อง
+    const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
+
+    if (!devices.length) {
+      alert("❌ ไม่พบกล้อง");
+      return;
+    }
+
+    // เลือกกล้องหลัง (ตัวสุดท้าย)
+    const backCamera = devices[devices.length - 1].deviceId;
+
     controls = await codeReader.decodeFromVideoDevice(
-      null,
+      backCamera,
       'video',
       (result, err) => {
         if (result) {
@@ -60,7 +71,7 @@ async function startScan() {
 
           navigator.vibrate && navigator.vibrate(100);
 
-          alert("สแกนได้:\n" + text);
+          alert("✅ สแกนได้:\n" + text);
 
           // ยิงเข้า Apps Script
           fetch("https://script.google.com/macros/s/AKfycbwXPMj_QZdNFbKSaL69xqXoH7iXVaZeO5hRgWMTbYoSXm1T-AYMrvajOAPtt9evg40sfA/exec", {
@@ -70,26 +81,24 @@ async function startScan() {
             },
             body: JSON.stringify({
               action: "in",
-              type: "device",
-              name: "Auto Scan",
-              brand: "Auto",
-              model: "Auto",
               sn: text,
-              location: "คลัง",
-              note: "scan pro"
+              location: "scan-pro"
             })
           });
         }
       }
     );
+
   } catch (err) {
-    alert("เปิดกล้องไม่ได้: " + err);
+    console.error(err);
+    alert("❌ เปิดกล้องไม่ได้:\n" + err);
   }
 }
 
 function stopScan() {
   if (controls) {
     controls.stop();
+    controls = null;
     codeReader = null;
   }
 }
