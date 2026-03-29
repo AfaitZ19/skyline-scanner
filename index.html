@@ -1,72 +1,97 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Skyline Scanner</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Skyline Scanner PRO</title>
 
-  <script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://unpkg.com/@zxing/browser@0.1.1"></script>
 
-  <style>
-    body {
-      font-family: Arial;
-      text-align: center;
-      padding: 20px;
-      background: #f5f7fa;
-    }
-    #reader {
-      width: 300px;
-      margin: 20px auto;
-    }
-    button {
-      padding: 12px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 10px;
-      background: #1a4fa0;
-      color: white;
-      cursor: pointer;
-    }
-  </style>
+<style>
+body {
+  font-family: Arial;
+  text-align: center;
+  padding: 20px;
+  background: #f5f7fa;
+}
+video {
+  width: 100%;
+  max-width: 400px;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+button {
+  padding: 14px 20px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  background: #1a4fa0;
+  color: white;
+  margin: 10px;
+}
+</style>
 </head>
 
 <body>
 
-<h2>📦 Skyline Scanner</h2>
+<h2>📦 Skyline Scanner PRO</h2>
 
 <button onclick="startScan()">📷 เปิดกล้อง</button>
+<button onclick="stopScan()">⛔ หยุด</button>
 
-<div id="reader"></div>
+<video id="video"></video>
 
 <script>
-let scanner;
+let codeReader;
+let controls;
 
-function startScan() {
-  if (scanner) return;
+async function startScan() {
+  if (codeReader) return;
 
-  scanner = new Html5Qrcode("reader");
+  codeReader = new ZXing.BrowserMultiFormatReader();
 
-  scanner.start(
-    { facingMode: "environment" },
-    {
-      fps: 10,
-      qrbox: 250
-    },
-    (decodedText) => {
-      alert("สแกนได้: " + decodedText);
+  try {
+    controls = await codeReader.decodeFromVideoDevice(
+      null,
+      'video',
+      (result, err) => {
+        if (result) {
+          const text = result.getText();
 
-      // ยิงเข้า Apps Script
-      fetch("https://script.google.com/macros/s/AKfycbwXPMj_QZdNFbKSaL69xqXoH7iXVaZeO5hRgWMTbYoSXm1T-AYMrvajOAPtt9evg40sfA/exec", {
-        method: "POST",
-        body: JSON.stringify({
-          action: "in",
-          code: decodedText
-        })
-      });
-    }
-  ).catch(err => {
+          navigator.vibrate && navigator.vibrate(100);
+
+          alert("สแกนได้:\n" + text);
+
+          // ยิงเข้า Apps Script
+          fetch("https://script.google.com/macros/s/AKfycbwXPMj_QZdNFbKSaL69xqXoH7iXVaZeO5hRgWMTbYoSXm1T-AYMrvajOAPtt9evg40sfA/exec", {
+            method: "POST",
+            headers: {
+              "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify({
+              action: "in",
+              type: "device",
+              name: "Auto Scan",
+              brand: "Auto",
+              model: "Auto",
+              sn: text,
+              location: "คลัง",
+              note: "scan pro"
+            })
+          });
+        }
+      }
+    );
+  } catch (err) {
     alert("เปิดกล้องไม่ได้: " + err);
-  });
+  }
+}
+
+function stopScan() {
+  if (controls) {
+    controls.stop();
+    codeReader = null;
+  }
 }
 </script>
 
