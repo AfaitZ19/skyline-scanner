@@ -101,11 +101,15 @@
                 headers: {
                   "Content-Type": "text/plain;charset=utf-8"
                 },
-                body: JSON.stringify({
-                  action: "in",
-                  sn: decodedText,
-                  location: "github-scanner"
-                })
+              body: JSON.stringify({
+                 action: "in",
+                 type: "device",
+                 name: "Auto Scan",
+                 brand: "Auto",
+                 model: "Auto",
+                 sn: decodedText,
+                 location: "scan"
+               })
               });
 
               const txt = await res.text();
