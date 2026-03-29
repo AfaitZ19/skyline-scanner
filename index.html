@@ -1,99 +1,150 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Skyline Scanner FINAL</title>
-
-<script src="https://unpkg.com/html5-qrcode"></script>
-
-<style>
-body {
-  font-family: Arial;
-  text-align: center;
-  padding: 20px;
-  background: #f5f7fa;
-}
-#reader {
-  width: 100%;
-  max-width: 400px;
-  margin: auto;
-}
-button {
-  padding: 14px 20px;
-  font-size: 16px;
-  border-radius: 10px;
-  border: none;
-  background: #1a4fa0;
-  color: white;
-  margin: 10px;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skyline Scanner</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    body{
+      font-family: Arial, sans-serif;
+      text-align:center;
+      background:#f5f7fa;
+      padding:20px;
+      margin:0;
+    }
+    h1{
+      font-size:32px;
+      margin:20px 0 10px;
+    }
+    .btn{
+      background:#123f8c;
+      color:#fff;
+      border:none;
+      border-radius:14px;
+      padding:14px 22px;
+      font-size:20px;
+      margin:8px;
+      cursor:pointer;
+    }
+    #reader{
+      width:100%;
+      max-width:420px;
+      margin:20px auto;
+      background:#fff;
+      border-radius:16px;
+      overflow:hidden;
+    }
+    #result{
+      max-width:420px;
+      margin:16px auto 0;
+      background:#fff;
+      border-radius:14px;
+      padding:16px;
+      text-align:left;
+      word-break:break-word;
+      box-shadow:0 2px 10px rgba(0,0,0,.08);
+      font-size:18px;
+    }
+    .ok{color:#0a7a35;font-weight:bold;}
+    .err{color:#b00020;font-weight:bold;}
+  </style>
 </head>
-
 <body>
 
-<h2>📦 Skyline Scanner FINAL</h2>
+  <h1>📦 Skyline Scanner</h1>
 
-<button onclick="startScan()">📷 เปิดกล้อง</button>
-<button onclick="stopScan()">⛔ หยุด</button>
+  <button class="btn" onclick="startScan()">📷 เปิดกล้อง</button>
+  <button class="btn" onclick="stopScan()">⛔ หยุด</button>
 
-<div id="reader"></div>
+  <div id="reader"></div>
 
-<script>
-let scanner = null;
+  <div id="result">รอการสแกน...</div>
 
-function startScan() {
-  if (scanner) return;
+  <script>
+    let scanner = null;
+    let lastText = "";
+    let lastTime = 0;
 
-  scanner = new Html5Qrcode("reader");
+    function setResult(html) {
+      document.getElementById("result").innerHTML = html;
+    }
 
-  scanner.start(
-    { facingMode: "environment" },
-    {
-      fps: 15,
-      qrbox: { width: 320, height: 120 }, // 🔥 สำหรับ barcode
-      formatsToSupport: [
-        Html5QrcodeSupportedFormats.CODE_128,
-        Html5QrcodeSupportedFormats.CODE_39,
-        Html5QrcodeSupportedFormats.EAN_13,
-        Html5QrcodeSupportedFormats.EAN_8,
-        Html5QrcodeSupportedFormats.UPC_A,
-        Html5QrcodeSupportedFormats.UPC_E,
-        Html5QrcodeSupportedFormats.ITF,
-        Html5QrcodeSupportedFormats.QR_CODE
-      ]
-    },
-    (text) => {
-      navigator.vibrate && navigator.vibrate(100);
+    async function startScan() {
+      if (scanner) return;
 
-      alert("✅ สแกนได้:\n" + text);
+      scanner = new Html5Qrcode("reader");
 
-      fetch("https://script.google.com/macros/s/AKfycbwXPMj_QZdNFbKSaL69xqXoH7iXVaZeO5hRgWMTbYoSXm1T-AYMrvajOAPtt9evg40sfA/exec", {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
-        body: JSON.stringify({
-          action: "in",
-          sn: text
-        })
-      });
-    },
-    (err) => {}
-  ).catch(err => {
-    alert("❌ เปิดกล้องไม่ได้:\n" + err);
-  });
-}
+      try {
+        await scanner.start(
+          { facingMode: { exact: "environment" } },
+          {
+            fps: 10,
+            qrbox: { width: 280, height: 280 }, 
+            rememberLastUsedCamera: true,
+            aspectRatio: 1.0
+          },
+          async (decodedText) => {
+            const now = Date.now();
 
-function stopScan() {
-  if (scanner) {
-    scanner.stop().then(() => {
+            if (decodedText === lastText && now - lastTime < 2000) return;
+            lastText = decodedText;
+            lastTime = now;
+
+            navigator.vibrate && navigator.vibrate(100);
+
+            setResult(`<div class="ok">สแกนได้สำเร็จ</div><br>${decodedText}`);
+
+            try {
+              const res = await fetch("https://script.google.com/macros/s/AKfycbwXPMj_QZdNFbKSaL69xqXoH7iXVaZeO5hRgWMTbYoSXm1T-AYMrvajOAPtt9evg40sfA/exec", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "text/plain;charset=utf-8"
+                },
+                body: JSON.stringify({
+                  action: "in",
+                  sn: decodedText,
+                  location: "github-scanner"
+                })
+              });
+
+              const txt = await res.text();
+              setResult(`
+                <div class="ok">สแกนได้สำเร็จ</div><br>
+                ${decodedText}
+                <hr>
+                <div>ส่งเข้า Apps Script แล้ว</div>
+                <div style="font-size:14px;color:#666;">${txt}</div>
+              `);
+            } catch (e) {
+              setResult(`
+                <div class="ok">สแกนได้สำเร็จ</div><br>
+                ${decodedText}
+                <hr>
+                <div class="err">แต่ส่งเข้า Apps Script ไม่สำเร็จ</div>
+                <div style="font-size:14px;color:#666;">${e}</div>
+              `);
+            }
+          },
+          (errorMessage) => {
+            // ไม่ต้อง alert ทุก frame
+          }
+        );
+      } catch (err) {
+        setResult(`<div class="err">เปิดกล้องไม่ได้</div><br>${err}`);
+        scanner = null;
+      }
+    }
+
+    async function stopScan() {
+      if (!scanner) return;
+      try {
+        await scanner.stop();
+        await scanner.clear();
+      } catch (e) {}
       scanner = null;
-    });
-  }
-}
-</script>
-
+      setResult("หยุดกล้องแล้ว");
+    }
+  </script>
 </body>
 </html>
