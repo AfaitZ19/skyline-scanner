@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Skyline Scanner PRO</title>
+<title>Skyline Scanner FINAL</title>
 
-<!-- โหลด ZXing แบบเสถียร -->
-<script src="https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/index.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
 body {
@@ -15,11 +14,10 @@ body {
   padding: 20px;
   background: #f5f7fa;
 }
-video {
+#reader {
   width: 100%;
   max-width: 400px;
-  border-radius: 12px;
-  margin-top: 20px;
+  margin: auto;
 }
 button {
   padding: 14px 20px;
@@ -35,74 +33,64 @@ button {
 
 <body>
 
-<h2>📦 Skyline Scanner PRO</h2>
+<h2>📦 Skyline Scanner FINAL</h2>
 
 <button onclick="startScan()">📷 เปิดกล้อง</button>
 <button onclick="stopScan()">⛔ หยุด</button>
 
-<video id="video" autoplay muted playsinline></video>
+<div id="reader"></div>
 
 <script>
-let codeReader = null;
-let controls = null;
+let scanner = null;
 
-async function startScan() {
+function startScan() {
+  if (scanner) return;
 
-  // 🔥 เช็ค ZXing ก่อน
-  if (typeof ZXing === "undefined") {
-    alert("❌ ZXing โหลดไม่เข้า (ลอง refresh ใหม่)");
-    return;
-  }
+  scanner = new Html5Qrcode("reader");
 
-  if (codeReader) return;
+  scanner.start(
+    { facingMode: "environment" },
+    {
+      fps: 15,
+      qrbox: { width: 320, height: 120 }, // 🔥 สำหรับ barcode
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+        Html5QrcodeSupportedFormats.ITF,
+        Html5QrcodeSupportedFormats.QR_CODE
+      ]
+    },
+    (text) => {
+      navigator.vibrate && navigator.vibrate(100);
 
-  try {
-    codeReader = new ZXing.BrowserMultiFormatReader();
+      alert("✅ สแกนได้:\n" + text);
 
-    const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
-
-    if (!devices.length) {
-      alert("❌ ไม่พบกล้อง");
-      return;
-    }
-
-    const deviceId = devices[devices.length - 1].deviceId;
-
-    controls = await codeReader.decodeFromVideoDevice(
-      deviceId,
-      'video',
-      (result, err) => {
-        if (result) {
-          const text = result.getText();
-
-          navigator.vibrate && navigator.vibrate(100);
-
-          alert("✅ สแกนได้:\n" + text);
-
-          fetch("https://script.google.com/macros/s/AKfycbwXPMj_QZdNFbKSaL69xqXoH7iXVaZeO5hRgWMTbYoSXm1T-AYMrvajOAPtt9evg40sfA/exec", {
-            method: "POST",
-            headers: {
-              "Content-Type": "text/plain;charset=utf-8"
-            },
-            body: JSON.stringify({
-              action: "in",
-              sn: text
-            })
-          });
-        }
-      }
-    );
-
-  } catch (err) {
+      fetch("https://script.google.com/macros/s/AKfycbwXPMj_QZdNFbKSaL69xqXoH7iXVaZeO5hRgWMTbYoSXm1T-AYMrvajOAPtt9evg40sfA/exec", {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify({
+          action: "in",
+          sn: text
+        })
+      });
+    },
+    (err) => {}
+  ).catch(err => {
     alert("❌ เปิดกล้องไม่ได้:\n" + err);
-    console.log(err);
-  }
+  });
 }
 
 function stopScan() {
-  if (controls) {
-    controls.stop();
-    codeReader = null;
+  if (scanner) {
+    scanner.stop().then(() => {
+      scanner = null;
+    });
   }
 }
 </script>
