@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Skyline Scanner PRO</title>
 
-<script src="https://unpkg.com/@zxing/browser@latest"></script>
+<!-- โหลด ZXing แบบเสถียร -->
+<script src="https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/index.min.js"></script>
 
 <style>
 body {
@@ -46,12 +47,18 @@ let codeReader = null;
 let controls = null;
 
 async function startScan() {
+
+  // 🔥 เช็ค ZXing ก่อน
+  if (typeof ZXing === "undefined") {
+    alert("❌ ZXing โหลดไม่เข้า (ลอง refresh ใหม่)");
+    return;
+  }
+
   if (codeReader) return;
 
   try {
     codeReader = new ZXing.BrowserMultiFormatReader();
 
-    // ดึง list กล้อง
     const devices = await ZXing.BrowserCodeReader.listVideoInputDevices();
 
     if (!devices.length) {
@@ -59,11 +66,10 @@ async function startScan() {
       return;
     }
 
-    // เลือกกล้องหลัง (ตัวสุดท้าย)
-    const backCamera = devices[devices.length - 1].deviceId;
+    const deviceId = devices[devices.length - 1].deviceId;
 
     controls = await codeReader.decodeFromVideoDevice(
-      backCamera,
+      deviceId,
       'video',
       (result, err) => {
         if (result) {
@@ -73,7 +79,6 @@ async function startScan() {
 
           alert("✅ สแกนได้:\n" + text);
 
-          // ยิงเข้า Apps Script
           fetch("https://script.google.com/macros/s/AKfycbwXPMj_QZdNFbKSaL69xqXoH7iXVaZeO5hRgWMTbYoSXm1T-AYMrvajOAPtt9evg40sfA/exec", {
             method: "POST",
             headers: {
@@ -81,8 +86,7 @@ async function startScan() {
             },
             body: JSON.stringify({
               action: "in",
-              sn: text,
-              location: "scan-pro"
+              sn: text
             })
           });
         }
@@ -90,15 +94,14 @@ async function startScan() {
     );
 
   } catch (err) {
-    console.error(err);
     alert("❌ เปิดกล้องไม่ได้:\n" + err);
+    console.log(err);
   }
 }
 
 function stopScan() {
   if (controls) {
     controls.stop();
-    controls = null;
     codeReader = null;
   }
 }
