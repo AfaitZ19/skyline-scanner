@@ -1,398 +1,1025 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Skyline Scanner GTIN</title>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <style>
-    body{
-      font-family: Arial, sans-serif;
-      text-align:center;
-      background:#f5f7fa;
-      padding:20px;
-      margin:0;
-      color:#111;
-    }
-    h1{
-      font-size:28px;
-      margin:16px 0 18px;
-    }
-    .btn{
-      background:#123f8c;
-      color:#fff;
-      border:none;
-      border-radius:14px;
-      padding:14px 22px;
-      font-size:18px;
-      margin:8px;
-      cursor:pointer;
-    }
-    #reader{
-      width:100%;
-      max-width:420px;
-      margin:20px auto;
-      background:#fff;
-      border-radius:16px;
-      overflow:hidden;
-      box-shadow:0 2px 10px rgba(0,0,0,.08);
-    }
-    #result{
-      max-width:420px;
-      margin:16px auto 0;
-      background:#fff;
-      border-radius:14px;
-      padding:16px;
-      text-align:left;
-      word-break:break-word;
-      box-shadow:0 2px 10px rgba(0,0,0,.08);
-      font-size:16px;
-      line-height:1.6;
-    }
-    .ok{color:#0a7a35;font-weight:bold;}
-    .err{color:#b00020;font-weight:bold;}
-    .warn{color:#a06a00;font-weight:bold;}
-    .muted{color:#666;font-size:13px;}
-    .row{margin-bottom:4px;}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Skyline Medical — Stock</title>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --B:#1a4fa0;--BL:#e8f0fc;
+  --G:#1a7a4a;--GL:#e6f4ed;
+  --R:#b92e2e;--RL:#fbeaea;
+  --A:#a06a00;--AL:#fdf3e3;
+  --bd:#e0e0e0;--bg:#f0f2f5;--tx:#1a1a1a;--mu:#6b7280;
+  --ra:10px;--sh:0 2px 8px rgba(0,0,0,.08)
+}
+body{font-family:'Sarabun',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+.sc{display:none;min-height:100vh;flex-direction:column}
+.sc.on{display:flex}
+
+#scSetup{background:var(--B);align-items:center;justify-content:center;padding:20px}
+.card{background:#fff;border-radius:16px;padding:26px 22px;width:100%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.logo-row{display:flex;align-items:center;gap:11px;margin-bottom:20px}
+.logo-sq{width:46px;height:46px;background:var(--B);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-sq svg{width:26px;height:26px;fill:#fff}
+.logo-row h1{font-size:17px;font-weight:700;color:var(--B)}
+.logo-row p{font-size:11px;color:var(--mu);margin-top:1px}
+.lbl{font-size:12px;font-weight:700;color:#555;display:block;margin-bottom:4px}
+.inp{width:100%;padding:10px 12px;border:1.5px solid var(--bd);border-radius:var(--ra);font-size:13px;font-family:inherit;outline:none;margin-bottom:9px}
+.inp:focus{border-color:var(--B)}
+.hint{font-size:11px;color:var(--mu);line-height:1.5;margin:-5px 0 9px}
+.btn-p{width:100%;padding:12px;background:var(--B);color:#fff;border:none;border-radius:var(--ra);font-size:14px;font-family:inherit;font-weight:700;cursor:pointer}
+.err{background:var(--RL);color:var(--R);padding:9px 12px;border-radius:8px;font-size:12px;margin-bottom:9px;display:none}
+
+.bar{background:var(--B);color:#fff;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.bar-l{display:flex;align-items:center;gap:7px}
+.bar-title{font-size:15px;font-weight:700}
+.pill{font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,.15);white-space:nowrap}
+.pill.ok{background:rgba(26,122,74,.45)}
+.pill.busy{background:rgba(255,200,0,.3)}
+.pill.err{background:rgba(185,46,46,.45)}
+.bar-r{display:flex;align-items:center;gap:6px}
+.usr{font-size:11px;background:rgba(255,255,255,.2);padding:3px 9px;border-radius:20px}
+.btn-xs{background:rgba(255,255,255,.15);border:none;color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;cursor:pointer;font-family:inherit}
+
+.main{flex:1;padding:13px;overflow-y:auto}
+@media(min-width:500px){.main{max-width:640px;margin:0 auto}}
+
+.tabs{display:flex;background:#fff;border-radius:var(--ra);padding:4px;box-shadow:var(--sh);margin-bottom:13px;gap:2px}
+.tab{flex:1;padding:8px 3px;text-align:center;font-size:11px;border-radius:7px;cursor:pointer;color:var(--mu);font-weight:500;border:none;background:none;font-family:inherit}
+.tab.on{background:var(--B);color:#fff}
+
+.mrow{display:flex;gap:8px;margin-bottom:11px}
+.mbtn{flex:1;padding:10px;border-radius:var(--ra);border:1.5px solid var(--bd);background:#fff;font-size:13px;font-family:inherit;cursor:pointer;font-weight:600;color:var(--mu)}
+.mbtn.in.on{border-color:var(--G);background:var(--GL);color:var(--G)}
+.mbtn.out.on{border-color:var(--R);background:var(--RL);color:var(--R)}
+
+.sbox{background:#fff;border-radius:var(--ra);padding:13px;box-shadow:var(--sh);margin-bottom:11px}
+.shint{text-align:center;font-size:12px;color:var(--mu);margin-bottom:7px;display:flex;align-items:center;justify-content:center;gap:5px}
+.dot{width:7px;height:7px;border-radius:50%;background:#e53;animation:p 1s infinite;flex-shrink:0}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.2}}
+#reader{width:100%;border-radius:8px;overflow:hidden;min-height:180px;background:#f0f2f5}
+#reader video{width:100%!important}
+.scan-btn-wrap{display:flex;justify-content:center;margin:8px 0 6px}
+.scan-btn{background:var(--B);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+.mtog{text-align:center;margin-top:7px}
+.mtog button{background:none;border:none;color:var(--B);font-size:11px;cursor:pointer;font-family:inherit;text-decoration:underline}
+.mform{background:#f7f8fa;border-radius:8px;padding:11px;margin-top:7px;display:none}
+.mform.on{display:block}
+.mform input{width:100%;padding:9px 11px;border:1px solid var(--bd);border-radius:7px;font-size:13px;font-family:inherit;outline:none}
+.mform input:focus{border-color:var(--B)}
+.mform button{width:100%;margin-top:7px;padding:9px;background:var(--B);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600}
+
+.rbox{background:var(--BL);border:1.5px solid var(--B);border-radius:var(--ra);padding:13px;margin-bottom:11px;display:none}
+.rbox.on{display:block}
+.rhd{font-size:12px;font-weight:700;color:var(--B);margin-bottom:7px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 9px;font-size:12px}
+.kv dt{color:var(--mu)}
+.kv dd{font-weight:600;word-break:break-all}
+
+.flbl{font-size:12px;font-weight:700;color:#444;display:block;margin-bottom:4px}
+.fsel,.finp{width:100%;padding:10px 11px;border:1.5px solid var(--bd);border-radius:var(--ra);font-size:13px;font-family:inherit;background:#fff;outline:none;margin-bottom:9px}
+.fsel:focus,.finp:focus{border-color:var(--B)}
+.arow{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:2px}
+.bin{background:var(--G);color:#fff;border:none;border-radius:var(--ra);padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.bout{background:var(--R);color:#fff;border:none;border-radius:var(--ra);padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:none}
+.bin:disabled,.bout:disabled{opacity:.45;cursor:not-allowed}
+
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.sc2{background:#fff;border-radius:var(--ra);padding:11px 6px;box-shadow:var(--sh);text-align:center}
+.sl{font-size:10px;color:var(--mu);margin-bottom:2px}
+.sv{font-size:20px;font-weight:700;color:var(--B);line-height:1}
+
+.chips{display:flex;gap:5px;margin-bottom:9px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch}
+.chips::-webkit-scrollbar{display:none}
+.chip{padding:5px 11px;border-radius:20px;border:1px solid var(--bd);background:#fff;font-size:11px;white-space:nowrap;cursor:pointer;font-family:inherit;color:var(--mu)}
+.chip.on{background:var(--B);color:#fff;border-color:var(--B)}
+
+.ic{background:#fff;border-radius:var(--ra);padding:11px 12px;box-shadow:var(--sh);margin-bottom:8px;border-left:4px solid var(--bd)}
+.ic.device{border-left-color:var(--B)}
+.ic.mask{border-left-color:var(--G)}
+.ic.accessory{border-left-color:var(--A)}
+.ic-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:5px}
+.ic-nm{font-size:13px;font-weight:700;flex:1;padding-right:7px}
+.bg{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;white-space:nowrap}
+.bd2{background:var(--BL);color:var(--B)}
+.bm{background:var(--GL);color:var(--G)}
+.ba{background:var(--AL);color:var(--A)}
+.ic-kv{display:grid;grid-template-columns:auto 1fr;gap:2px 7px;font-size:11px}
+.ic-kv dt{color:var(--mu)}
+.ic-kv dd{font-weight:500;word-break:break-all}
+.ic-ft{display:flex;align-items:center;justify-content:space-between;margin-top:7px;padding-top:7px;border-top:1px solid var(--bd);gap:10px}
+.ic-meta{font-size:10px;color:var(--mu)}
+.btn-co{background:var(--RL);color:var(--R);border:1px solid #f0a0a0;border-radius:7px;padding:4px 9px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
+
+.hi{background:#fff;border-radius:8px;padding:9px 11px;margin-bottom:6px;display:flex;align-items:flex-start;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.hd{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.hd.in{background:var(--GL)}
+.hd.out{background:var(--RL)}
+.hn{font-size:12px;font-weight:600}
+.hm{font-size:10px;color:var(--mu);margin-top:1px}
+.ht{font-size:10px;color:var(--mu);margin-left:auto;text-align:right;white-space:nowrap;flex-shrink:0}
+
+.scrd{background:#fff;border-radius:var(--ra);padding:14px;box-shadow:var(--sh);margin-bottom:10px}
+.scrd h3{font-size:13px;font-weight:700;color:#333;margin-bottom:9px}
+.bfull{width:100%;padding:10px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600;margin-bottom:6px}
+.bout2{background:#fff;color:var(--B);border:1.5px solid var(--B)}
+.steps{list-style:none;counter-reset:s}
+.steps li{counter-increment:s;font-size:12px;color:#444;line-height:1.7;display:flex;gap:7px;padding-left:2px}
+.steps li::before{content:counter(s);background:var(--BL);color:var(--B);width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;margin-top:2px}
+
+.empty{text-align:center;padding:36px 20px;color:var(--mu)}
+.empty-ic{font-size:36px;margin-bottom:8px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:22px;font-size:12px;z-index:9999;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;max-width:92vw;text-align:center}
+.toast.on{opacity:1}
+.toast.ok{background:var(--G)}
+.toast.err{background:var(--R)}
+.toast.warn{background:var(--A)}
+.small{font-size:11px;color:var(--mu)}
+</style>
 </head>
 <body>
 
-  <h1>📦 Skyline Scanner GTIN</h1>
+<div id="scSetup" class="sc on">
+  <div class="card">
+    <div class="logo-row">
+      <div class="logo-sq">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+      </div>
+      <div>
+        <h1>Skyline Medical</h1>
+        <p>ระบบสต็อก — เชื่อม Google Sheets</p>
+      </div>
+    </div>
 
-  <button class="btn" onclick="startScan()">📷 เปิดกล้อง</button>
-  <button class="btn" onclick="stopScan()">⛔ หยุด</button>
+    <div class="err" id="setupErr"></div>
 
-  <div id="reader"></div>
-  <div id="result">รอการสแกน...</div>
+    <label class="lbl">Apps Script Web App URL</label>
+    <input class="inp" id="apiUrl" placeholder="https://script.google.com/macros/s/.../exec" type="url">
 
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbwXPMj_QZdNFbKSaL69xqXoH7iXVaZeO5hRgWMTbYoSXm1T-AYMrvajOAPtt9evg40sfA/exec";
+    <label class="lbl">ชื่อผู้ใช้</label>
+    <input class="inp" id="setupUser" placeholder="เช่น stock หรือ admin">
 
-    // ===== ฐานข้อมูล GTIN =====
-    // เพิ่มของจริงของมึงเข้าไปเรื่อย ๆ ตรงนี้
-    const PRODUCT_DB = {
-      "04719893347081": {
-        type: "device",
-        name: "APEX iX Auto + Humidifier",
-        brand: "APEX Medical",
-        model: "iX Auto + Humidifier"
-      },
-      "04713025000400": {
-        type: "device",
-        name: "APEX iX Auto",
-        brand: "APEX Medical",
-        model: "iX Auto"
-      },
-      "04713025000226": {
-        type: "device",
-        name: "APEX iX Auto Humidifier",
-        brand: "APEX Medical",
-        model: "iX Auto Humidifier"
-      },
-      "04713025000073": {
-        type: "device",
-        name: "APEX XT Auto",
-        brand: "APEX Medical",
-        model: "XT Auto"
-      },
-      "04719893347319": {
-        type: "mask",
-        name: "WiZARD 510 Nasal Mask",
-        brand: "Wellell",
-        model: "WiZARD 510"
-      },
-      "00606959006829": {
-        type: "mask",
-        name: "Philips Wisp Mask Fabric",
-        brand: "Philips Respironics",
-        model: "Wisp"
-      },
-      "06958949938318": {
-        type: "mask",
-        name: "Beyond EaseFit NM5",
-        brand: "Hunan Beyond",
-        model: "EaseFit NM5"
+    <label class="lbl">รหัสผ่าน</label>
+    <input class="inp" id="setupPass" type="password" placeholder="รหัสผ่าน">
+
+    <button class="btn-p" onclick="doSetup()">เข้าสู่ระบบ</button>
+    <p class="hint">รหัสผ่าน: stock=1234 | admin=admin123</p>
+  </div>
+</div>
+
+<div id="scApp" class="sc">
+  <div class="bar">
+    <div class="bar-l">
+      <span class="bar-title">📦 Skyline Stock</span>
+      <span class="pill" id="pill">● Sheet</span>
+    </div>
+    <div class="bar-r">
+      <span class="usr" id="usrBadge">—</span>
+      <button class="btn-xs" onclick="signOut()">ออก</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="tabs">
+      <button class="tab on" onclick="goTab('scan')" id="t-scan">🔍 สแกน</button>
+      <button class="tab" onclick="goTab('stock')" id="t-stock">📦 สต็อก</button>
+      <button class="tab" onclick="goTab('hist')" id="t-hist">📋 ประวัติ</button>
+      <button class="tab" onclick="goTab('cfg')" id="t-cfg">⚙️</button>
+    </div>
+
+    <div id="v-scan">
+      <div class="mrow">
+        <button class="mbtn in on" id="mIn" onclick="setMode('in')">⬇️ รับเข้า</button>
+        <button class="mbtn out" id="mOut" onclick="setMode('out')">⬆️ จ่ายออก</button>
+      </div>
+
+      <div class="sbox">
+        <div class="shint"><span class="dot"></span>เล็งกล้องที่ QR / Barcode</div>
+        <div class="scan-btn-wrap">
+          <button class="scan-btn" onclick="startScan()">📷 เปิดกล้อง</button>
+        </div>
+        <div id="reader"></div>
+        <div class="mtog"><button onclick="toggleM()">ป้อนรหัสด้วยตนเอง</button></div>
+        <div class="mform" id="mf">
+          <input type="text" id="mc" placeholder="Barcode / SN / LOT">
+          <button onclick="procM()">ยืนยัน</button>
+        </div>
+      </div>
+
+      <div class="rbox" id="rbox">
+        <div class="rhd">✅ ข้อมูลสินค้า</div>
+        <dl class="kv" id="rkv"></dl>
+      </div>
+
+      <div id="sf" style="display:none">
+        <label class="flbl">ประเภท</label>
+        <select class="fsel" id="iType">
+          <option value="device">🖥️ เครื่อง CPAP/BPAP</option>
+          <option value="mask">😷 หน้ากาก</option>
+          <option value="accessory">🔧 อุปกรณ์เสริม</option>
+        </select>
+
+        <label class="flbl" id="locLabel">สถานที่ / โรงพยาบาล</label>
+        <input type="text" class="finp" id="locI" placeholder="คลังสินค้า / รพ...">
+
+        <label class="flbl">หมายเหตุ</label>
+        <input type="text" class="finp" id="noteI" placeholder="(ถ้ามี)">
+
+        <div class="small" style="margin:-2px 0 10px">
+          ระบบจะส่ง GTIN, LOT, SN, model, size, ref ไป backend ให้ครบที่สุด
+        </div>
+
+        <div class="arow">
+          <button class="bin" id="bIn" onclick="doAct('in')">✅ รับเข้า</button>
+          <button class="bout" id="bOut" onclick="doAct('out')">🔺 จ่ายออก</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="v-stock" style="display:none">
+      <div class="sg">
+        <div class="sc2"><div class="sl">🖥️ เครื่อง</div><div class="sv" id="sDv">—</div></div>
+        <div class="sc2"><div class="sl">😷 หน้ากาก</div><div class="sv" id="sMk">—</div></div>
+        <div class="sc2"><div class="sl">🔧 เสริม</div><div class="sv" id="sAc">—</div></div>
+      </div>
+
+      <div class="chips">
+        <button class="chip on" onclick="flt('all',this)">ทั้งหมด</button>
+        <button class="chip" onclick="flt('device',this)">เครื่อง</button>
+        <button class="chip" onclick="flt('mask',this)">หน้ากาก</button>
+        <button class="chip" onclick="flt('accessory',this)">อุปกรณ์เสริม</button>
+      </div>
+
+      <div id="stList"></div>
+    </div>
+
+    <div id="v-hist" style="display:none">
+      <div id="hiList"></div>
+    </div>
+
+    <div id="v-cfg" style="display:none">
+      <div class="scrd">
+        <h3>📊 สถานะการเชื่อมต่อ</h3>
+        <div id="connTxt" style="font-size:12px;padding:9px;background:#f7f8fa;border-radius:8px;line-height:1.6">—</div>
+        <button class="bfull bout2" style="margin-top:8px" onclick="loadAll()">🔄 รีเฟรชจาก Sheet</button>
+      </div>
+
+      <div class="scrd">
+        <h3>📖 วิธีติดตั้ง Apps Script</h3>
+        <ol class="steps">
+          <li>เปิด Google Sheet → Extensions → Apps Script</li>
+          <li>วาง Code.gs</li>
+          <li>Run <b>initSheet()</b></li>
+          <li>Deploy → New deployment → Web app</li>
+          <li>Execute as: Me</li>
+          <li>Who has access: Anyone</li>
+          <li>Copy URL มาใส่หน้า login</li>
+        </ol>
+      </div>
+
+      <div class="scrd">
+        <h3>🗑️ จัดการข้อมูล</h3>
+        <button class="bfull bout2" onclick="exportCSV()">📥 Export CSV ประวัติ</button>
+        <button class="bfull bout2" onclick="changeApiUrl()">🔗 เปลี่ยน API URL</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const USERS = { stock:'1234', admin:'admin123' };
+
+let API_URL = localStorage.getItem('skl_api') || '';
+let CUR_USER = '';
+let MODE = 'in';
+let LAST = null;
+let scanner = null;
+let scanOn = false;
+let sflt = 'all';
+
+let CACHE = {
+  device: [],
+  mask: [],
+  accessory: [],
+  history: []
+};
+
+let IS_PROCESSING = false;
+let LAST_SCAN_TEXT = '';
+let LAST_SCAN_TIME = 0;
+const DUP_MS = 5000;
+
+window.onload = () => {
+  if (API_URL) document.getElementById('apiUrl').value = API_URL;
+  updateModeUI();
+};
+
+async function doSetup() {
+  const url  = document.getElementById('apiUrl').value.trim();
+  const user = document.getElementById('setupUser').value.trim();
+  const pass = document.getElementById('setupPass').value.trim();
+
+  if (!url) return showSetupErr('กรุณาใส่ Apps Script URL');
+  if (!user) return showSetupErr('กรุณาใส่ชื่อผู้ใช้');
+  if (!pass) return showSetupErr('กรุณาใส่รหัสผ่าน');
+  if (!USERS[user] || USERS[user] !== pass) return showSetupErr('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+
+  setPill('busy');
+  hideSetupErr();
+
+  try {
+    const r = await apiFetch(url + '?action=ping');
+    if (!r.ok) throw new Error(r.error || 'API error');
+
+    API_URL = url;
+    CUR_USER = user;
+    localStorage.setItem('skl_api', url);
+
+    document.getElementById('scSetup').classList.remove('on');
+    document.getElementById('scApp').classList.add('on');
+    document.getElementById('usrBadge').textContent = user;
+
+    toast('✅ เข้าระบบสำเร็จ', 'ok');
+    await loadAll();
+    goTab('scan');
+  } catch (e) {
+    showSetupErr('เชื่อมต่อ API ไม่ได้: ' + e.message);
+    setPill('err');
+  }
+}
+
+function signOut() {
+  CUR_USER = '';
+  LAST = null;
+  stopScannerOnly();
+  document.getElementById('scApp').classList.remove('on');
+  document.getElementById('scSetup').classList.add('on');
+  document.getElementById('setupPass').value = '';
+  resetScan();
+}
+
+function changeApiUrl() {
+  localStorage.removeItem('skl_api');
+  signOut();
+}
+
+function showSetupErr(msg) {
+  const el = document.getElementById('setupErr');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideSetupErr() {
+  const el = document.getElementById('setupErr');
+  el.textContent = '';
+  el.style.display = 'none';
+}
+
+async function apiFetch(url) {
+  const r = await fetch(url, { redirect:'follow' });
+  return await r.json();
+}
+
+async function apiPost(body) {
+  const r = await fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify(body),
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    redirect: 'follow'
+  });
+  const txt = await r.text();
+  try {
+    return JSON.parse(txt);
+  } catch (e) {
+    throw new Error('Response ไม่ใช่ JSON: ' + txt.slice(0, 200));
+  }
+}
+
+async function loadAll() {
+  setPill('busy');
+  try {
+    const [stock, hist] = await Promise.all([
+      apiFetch(API_URL + '?action=stock'),
+      apiFetch(API_URL + '?action=history&n=200')
+    ]);
+
+    if (!stock.ok) throw new Error(stock.error || 'โหลด stock ไม่สำเร็จ');
+
+    CACHE.device = stock.device || [];
+    CACHE.mask = stock.mask || [];
+    CACHE.accessory = stock.accessory || [];
+    CACHE.history = (hist && hist.history) ? hist.history : [];
+
+    updateStats();
+    renderStock();
+    renderHist();
+
+    setPill('ok');
+    document.getElementById('connTxt').innerHTML =
+      `✅ เชื่อมต่อสำเร็จ<br>เครื่อง ${CACHE.device.length} | หน้ากาก ${sumQty(CACHE.mask, 'Qty')} | เสริม ${sumQty(CACHE.accessory, 'Qty')}<br>อัปเดต: ${new Date().toLocaleTimeString('th-TH')}`;
+  } catch (e) {
+    setPill('err');
+    document.getElementById('connTxt').textContent = '❌ ' + e.message;
+    toast('โหลดข้อมูลไม่ได้: ' + e.message, 'err');
+  }
+}
+
+function goTab(tab) {
+  ['scan','stock','hist','cfg'].forEach(id => {
+    document.getElementById('v-' + id).style.display = id === tab ? '' : 'none';
+    document.getElementById('t-' + id).classList.toggle('on', id === tab);
+  });
+  if (tab !== 'scan') stopScannerOnly();
+}
+
+function flt(type, el) {
+  sflt = type;
+  document.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
+  if (el) el.classList.add('on');
+  renderStock();
+}
+
+function setMode(m) {
+  MODE = m;
+  updateModeUI();
+}
+
+function updateModeUI() {
+  const isIn = MODE === 'in';
+  document.getElementById('mIn').classList.toggle('on', isIn);
+  document.getElementById('mOut').classList.toggle('on', !isIn);
+  document.getElementById('bIn').style.display = isIn ? 'block' : 'none';
+  document.getElementById('bOut').style.display = isIn ? 'none' : 'block';
+  document.getElementById('locLabel').textContent = isIn ? 'สถานที่ / โรงพยาบาล' : 'จ่ายให้เซลล์คนไหน';
+  document.getElementById('locI').placeholder = isIn ? 'คลังสินค้า / รพ...' : 'เช่น Mint, Ploy, ฝ่ายขายเหนือ';
+}
+
+function cleanText(raw) {
+  return String(raw || '')
+    .replace(/\u001d/g, '')
+    .replace(/\s+/g, '')
+    .trim()
+    .toUpperCase();
+}
+
+function fd(s) {
+  s = String(s || '');
+  if (!/^\d{6}$/.test(s)) return s;
+  const yy = parseInt(s.slice(0,2), 10);
+  const year = yy >= 50 ? '19' + s.slice(0,2) : '20' + s.slice(0,2);
+  return `${year}-${s.slice(2,4)}-${s.slice(4,6)}`;
+}
+
+function normalizeGTIN(gtin) {
+  return String(gtin || '').replace(/\D/g, '');
+}
+
+function parseGS1(cleaned) {
+  const out = { gtin:'', lot:'', sn:'', mfgDate:'', expiry:'' };
+  let i = 0;
+
+  while (i < cleaned.length) {
+    if (cleaned[i] !== '(') { i++; continue; }
+    const close = cleaned.indexOf(')', i);
+    if (close === -1) break;
+
+    const ai = cleaned.slice(i + 1, close);
+    const valueStart = close + 1;
+    const nextAI = cleaned.indexOf('(', valueStart);
+    const value = nextAI === -1 ? cleaned.slice(valueStart) : cleaned.slice(valueStart, nextAI);
+
+    if (ai === '01') out.gtin = value;
+    else if (ai === '10') out.lot = value;
+    else if (ai === '21') out.sn = value;
+    else if (ai === '11') out.mfgDate = fd(value);
+    else if (ai === '17') out.expiry = fd(value);
+
+    i = valueStart + value.length;
+  }
+  return out;
+}
+
+function inferMaskSizeFromLot(lot) {
+  lot = String(lot || '').toUpperCase();
+  const patterns = [
+    /NM\dA?([SML])/,
+    /PMI([SML])/,
+    /\b(XS|S|M|L|XL)\b/,
+    /[_-](XS|S|M|L|XL)\b/
+  ];
+  for (const re of patterns) {
+    const m = lot.match(re);
+    if (m) return (m[1] || '').toUpperCase();
+  }
+  return '';
+}
+
+function parseCode(raw) {
+  const cleaned = cleanText(raw);
+  if (!cleaned) return;
+
+  const now = Date.now();
+  if (IS_PROCESSING) return;
+  if (cleaned === LAST_SCAN_TEXT && (now - LAST_SCAN_TIME) < DUP_MS) return;
+
+  const d = {
+    raw: cleaned,
+    sn: '',
+    lot: '',
+    gtin: '',
+    mfgDate: '',
+    expiry: '',
+    ref: '',
+    size: '',
+    p: null
+  };
+
+  const gs1 = parseGS1(cleaned);
+  d.gtin = gs1.gtin || '';
+  d.lot = gs1.lot || '';
+  d.sn = gs1.sn || '';
+  d.mfgDate = gs1.mfgDate || '';
+  d.expiry = gs1.expiry || '';
+
+  if (!d.gtin) {
+    const m01 = cleaned.match(/01(\d{14})/);
+    if (m01) d.gtin = m01[1];
+  }
+  if (!d.mfgDate) {
+    const m11 = cleaned.match(/11(\d{6})/);
+    if (m11) d.mfgDate = fd(m11[1]);
+  }
+  if (!d.expiry) {
+    const m17 = cleaned.match(/17(\d{6})/);
+    if (m17) d.expiry = fd(m17[1]);
+  }
+  if (!d.lot) {
+    const idx10 = cleaned.indexOf('10');
+    if (idx10 !== -1) {
+      let tail = cleaned.slice(idx10 + 2);
+      const cut = tail.indexOf('21');
+      d.lot = cut !== -1 ? tail.slice(0, cut) : tail;
+    }
+  }
+  if (!d.sn) {
+    const idx21 = cleaned.indexOf('21');
+    if (idx21 !== -1) {
+      let tail = cleaned.slice(idx21 + 2);
+      const cut10 = tail.indexOf('10');
+      d.sn = cut10 !== -1 ? tail.slice(0, cut10) : tail;
+    }
+  }
+  if (!d.sn && /^\d{16,20}$/.test(cleaned)) d.sn = cleaned;
+  if (!d.sn && !d.lot && cleaned.length > 4 && !cleaned.startsWith('(')) d.sn = cleaned;
+
+  d.size = inferMaskSizeFromLot(d.lot);
+  d.p = lookup(d);
+
+  if (d.p) {
+    if (!d.size) d.size = d.p.size || '';
+    d.ref = d.p.ref || '';
+  }
+
+  LAST = d;
+  LAST_SCAN_TEXT = cleaned;
+  LAST_SCAN_TIME = now;
+
+  stopScannerOnly();
+  showResult(d);
+  toast('สแกนสำเร็จ', 'ok');
+}
+
+function lookup(d) {
+  const gtin = normalizeGTIN(d.gtin);
+  const lot = String(d.lot || '').toUpperCase();
+  const sn = String(d.sn || '').toUpperCase();
+
+  const db = [
+    { gtin:'04719893347081', name:'APEX iX Auto + Humidifier', brand:'APEX Medical', type:'device', model:'iX Auto + Humidifier' },
+    { gtin:'04713025000400', name:'APEX iX Auto', brand:'APEX Medical', type:'device', model:'iX Auto' },
+    { gtin:'04713025000226', name:'APEX iX Auto Humidifier', brand:'APEX Medical', type:'device', model:'iX Auto Humidifier' },
+    { gtin:'04713025000073', name:'APEX XT Auto', brand:'APEX Medical', type:'device', model:'XT Auto' },
+
+    { gtin:'6958949927319', name:'Beyond R-20i CPAP', brand:'Hunan Beyond', type:'device', model:'R-20i' },
+    { gtin:'6958949937687', name:'Beyond R-20i CPAP', brand:'Hunan Beyond', type:'device', model:'R-20i' },
+
+    { gtin:'04719893347319', name:'WiZARD 510 Nasal Mask', brand:'Wellell', type:'mask', model:'WiZARD 510' },
+    { gtin:'00606959006829', name:'Philips Wisp Mask Fabric', brand:'Philips Respironics', type:'mask', model:'Wisp' },
+
+    { gtin:'6958949938318', name:'Beyond EaseFit NM5', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM5', size:'M', ref:'78066' },
+    { gtin:'6958949993856', name:'Beyond EaseFit NM6A', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM6A', size:'M', ref:'78091' },
+    { gtin:'6958949993849', name:'Beyond EaseFit NM6', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM6', size:'L', ref:'78084' },
+    { gtin:'06958949938493', name:'Beyond EaseFit NM6', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM6', size:'L', ref:'78084' },
+    { gtin:'6958949993837', name:'Beyond EaseFit NM5A', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM5A', size:'L', ref:'78072' },
+    { gtin:'958949937694', name:'Beyond EaseFit NM5A', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM5A', size:'M', ref:'PT78044' },
+    { gtin:'6958949993769', name:'Beyond EaseFit NM5A', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM5A', size:'M', ref:'PT78044' },
+
+    { gtin:'06958949932057', name:'Breathing Tube HP1', brand:'Hunan Beyond', type:'accessory', model:'HP1', ref:'74001EU' },
+
+    { sn_exact:'26B17', name:'APEX Unknown Device 26B17', brand:'APEX Medical', type:'device', model:'Unknown' },
+    { sn_exact:'25J100', name:'APEX Unknown Device 25J100', brand:'APEX Medical', type:'device', model:'Unknown' },
+    { sn_exact:'26B39', name:'APEX Unknown Device 26B39', brand:'APEX Medical', type:'device', model:'Unknown' },
+
+    { sn_pfx:'CADL', name:'Beyond R-20i CPAP', brand:'Hunan Beyond', type:'device', model:'R-20i' },
+    { lot_pfx:'BY-C2506NM5', name:'Beyond EaseFit NM5', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM5' },
+    { lot_pfx:'BY-C2506NM6', name:'Beyond EaseFit NM6', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM6', size:'L', ref:'78084' },
+    { lot_pfx:'BY-C2312PMI', name:'Beyond EaseFit PMI', brand:'Hunan Beyond', type:'mask', model:'EaseFit PMI' },
+    { lot_pfx:'BY-B2501S', name:'Beyond SpO2 Kits', brand:'Hunan Beyond', type:'accessory', model:'SpO2 Kit' },
+    { lot_pfx:'BY-C2601R20', name:'Beyond R-20i BPAP', brand:'Hunan Beyond', type:'device', model:'R-20i' },
+    { lot_pfx:'BY-C2601R20I', name:'Beyond R-20i BPAP', brand:'Hunan Beyond', type:'device', model:'R-20i' }
+  ];
+
+  for (const p of db) {
+    if (p.gtin && normalizeGTIN(p.gtin) === gtin) return p;
+    if (p.sn_exact && p.sn_exact.toUpperCase() === sn) return p;
+    if (p.sn_pfx && sn.startsWith(p.sn_pfx.toUpperCase())) return p;
+    if (p.lot_pfx && lot.startsWith(p.lot_pfx.toUpperCase())) return p;
+  }
+
+  return null;
+}
+
+async function startScan() {
+  if (scanOn || IS_PROCESSING) return;
+
+  const readerEl = document.getElementById('reader');
+  readerEl.innerHTML = '';
+
+  try {
+    scanner = new Html5Qrcode('reader');
+    await scanner.start(
+      { facingMode: { exact: 'environment' } },
+      { fps: 10, qrbox: { width: 260, height: 120 } },
+      txt => parseCode(txt),
+      () => {}
+    );
+    scanOn = true;
+    toast('เปิดกล้องแล้ว', 'ok');
+  } catch (e1) {
+    try {
+      if (scanner) {
+        try { await scanner.stop(); } catch(_) {}
+        try { await scanner.clear(); } catch(_) {}
       }
+      scanner = new Html5Qrcode('reader');
+      await scanner.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 260, height: 120 } },
+        txt => parseCode(txt),
+        () => {}
+      );
+      scanOn = true;
+      toast('เปิดกล้องแล้ว', 'ok');
+    } catch (e2) {
+      readerEl.innerHTML = '<div style="text-align:center;padding:18px;color:#888;font-size:12px">เปิดกล้องไม่ได้<br>ให้กด “ป้อนรหัสด้วยตนเอง” แทน</div>';
+      toast('เปิดกล้องไม่ได้: ' + e2.message, 'err');
+    }
+  }
+}
+
+function stopScannerOnly() {
+  if (scanner) {
+    try { scanner.stop(); } catch(e) {}
+    try { scanner.clear(); } catch(e) {}
+  }
+  scanner = null;
+  scanOn = false;
+}
+
+function toggleM() {
+  const f = document.getElementById('mf');
+  f.classList.toggle('on');
+  if (f.classList.contains('on')) document.getElementById('mc').focus();
+}
+
+function procM() {
+  const code = document.getElementById('mc').value.trim();
+  if (!code) return;
+  parseCode(code);
+  document.getElementById('mc').value = '';
+  document.getElementById('mf').classList.remove('on');
+}
+
+function showResult(d) {
+  const rows = [];
+  if (d.p) {
+    rows.push(['สินค้า', d.p.name]);
+    rows.push(['แบรนด์', d.p.brand]);
+    rows.push(['ประเภท', d.p.type]);
+    rows.push(['รุ่น', d.p.model || '-']);
+  }
+  if (d.size) rows.push(['Size', d.size]);
+  if (d.ref) rows.push(['REF', d.ref]);
+  if (d.sn) rows.push(['SN', d.sn]);
+  if (d.lot) rows.push(['LOT', d.lot]);
+  if (d.gtin) rows.push(['GTIN', d.gtin]);
+  if (d.mfgDate) rows.push(['วันผลิต', d.mfgDate]);
+  if (d.expiry) rows.push(['วันหมดอายุ', d.expiry]);
+  if (!rows.length) rows.push(['รหัส', d.raw]);
+
+  document.getElementById('rkv').innerHTML = rows.map(([k,v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
+  if (d.p && d.p.type) document.getElementById('iType').value = d.p.type;
+
+  document.getElementById('rbox').classList.add('on');
+  document.getElementById('sf').style.display = 'block';
+  document.getElementById('locI').value = '';
+  document.getElementById('noteI').value = '';
+  updateModeUI();
+}
+
+function resetScan() {
+  LAST = null;
+  document.getElementById('rkv').innerHTML = '';
+  document.getElementById('rbox').classList.remove('on');
+  document.getElementById('sf').style.display = 'none';
+  document.getElementById('locI').value = '';
+  document.getElementById('noteI').value = '';
+  document.getElementById('mc').value = '';
+  document.getElementById('mf').classList.remove('on');
+  stopScannerOnly();
+  document.getElementById('reader').innerHTML = '';
+}
+
+async function doAct(action) {
+  if (!LAST) return toast('กรุณาสแกนก่อน', 'warn');
+  if (IS_PROCESSING) return;
+
+  const type = document.getElementById('iType').value;
+  const loc = document.getElementById('locI').value.trim();
+  const note = document.getElementById('noteI').value.trim();
+
+  if (action === 'out' && !loc) {
+    return toast('กรุณาระบุว่าเอาไปให้เซลล์คนไหน', 'warn');
+  }
+
+  IS_PROCESSING = true;
+  document.getElementById('bIn').disabled = true;
+  document.getElementById('bOut').disabled = true;
+  setPill('busy');
+
+  try {
+    const payload = {
+      action,
+      type,
+      name: LAST.p?.name || LAST.sn || LAST.lot || LAST.raw,
+      brand: LAST.p?.brand || '',
+      model: LAST.p?.model || '',
+      size: LAST.size || LAST.p?.size || '',
+      ref: LAST.ref || LAST.p?.ref || '',
+      sn: LAST.sn || '',
+      lot: LAST.lot || '',
+      gtin: LAST.gtin || '',
+      mfgDate: LAST.mfgDate || '',
+      expiry: LAST.expiry || '',
+      location: loc,
+      note,
+      user: CUR_USER
     };
 
-    let scanner = null;
-    let lastText = "";
-    let lastScanAt = 0;
-    let isProcessing = false;
-    const DUPLICATE_WINDOW_MS = 8000;
+    const res = await apiPost(payload);
+    if (!res.ok) throw new Error(res.error || 'API error');
 
-    function setResult(html) {
-      document.getElementById("result").innerHTML = html;
-    }
+    toast(action === 'in' ? '✅ รับเข้าเรียบร้อย' : '✅ จ่ายออกเรียบร้อย', 'ok');
+    resetScan();
+    await loadAll();
+  } catch (e) {
+    toast('บันทึกไม่สำเร็จ: ' + e.message, 'err');
+    setPill('err');
+  } finally {
+    IS_PROCESSING = false;
+    document.getElementById('bIn').disabled = false;
+    document.getElementById('bOut').disabled = false;
+  }
+}
 
-    function escapeHtml(str) {
-      return String(str || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
+async function quickOut(item) {
+  const who = prompt('จ่ายให้เซลล์คนไหน');
+  if (!who) return;
+  if (IS_PROCESSING) return;
 
-    function cleanScanText(text) {
-      if (!text) return "";
-      return String(text)
-        .replace(/[^\x20-\x7E]/g, "")
-        .replace(/\s+/g, "")
-        .trim()
-        .toUpperCase();
-    }
+  IS_PROCESSING = true;
+  setPill('busy');
 
-    function parseGS1(raw) {
-      const txt = cleanScanText(raw);
-      const out = {
-        raw: txt,
-        gtin: "",
-        lot: "",
-        sn: "",
-        mfgDate: ""
-      };
+  try {
+    const payload = {
+      action: 'out_by_id',
+      type: item.type,
+      sheetRow: item.sheetRow,
+      name: item.name || '',
+      brand: item.brand || '',
+      model: item.model || '',
+      size: item.size || '',
+      ref: item.ref || '',
+      sn: item.sn || '',
+      lot: item.lot || '',
+      gtin: item.gtin || '',
+      location: who,
+      user: CUR_USER,
+      note: ''
+    };
 
-      if (!txt) return out;
+    const res = await apiPost(payload);
+    if (!res.ok) throw new Error(res.error || 'API error');
 
-      // รองรับกรณีสแกนได้เป็น GS1 string เช่น 01069589499383181125062410BY...
-      if (txt.startsWith("01") && txt.length >= 16) {
-        const maybeGTIN = txt.slice(2, 16);
-        if (/^\d{14}$/.test(maybeGTIN)) out.gtin = maybeGTIN;
-      }
+    toast('✅ จ่ายออกเรียบร้อย', 'ok');
+    await loadAll();
+  } catch (e) {
+    toast('จ่ายออกไม่สำเร็จ: ' + e.message, 'err');
+    setPill('err');
+  } finally {
+    IS_PROCESSING = false;
+  }
+}
 
-      const idx11 = txt.indexOf("11");
-      if (idx11 !== -1 && txt.length >= idx11 + 8) {
-        const d = txt.slice(idx11 + 2, idx11 + 8);
-        if (/^\d{6}$/.test(d)) {
-          out.mfgDate = "20" + d.slice(0,2) + "-" + d.slice(2,4) + "-" + d.slice(4,6);
-        }
-      }
+function updateStats() {
+  document.getElementById('sDv').textContent = CACHE.device.length;
+  document.getElementById('sMk').textContent = sumQty(CACHE.mask, 'Qty');
+  document.getElementById('sAc').textContent = sumQty(CACHE.accessory, 'Qty');
+}
 
-      const idx21 = txt.indexOf("21");
-      const idx10 = txt.indexOf("10");
+function renderStock() {
+  const list = document.getElementById('stList');
+  let rows = [];
 
-      if (idx21 !== -1 && idx10 !== -1 && idx21 < idx10) {
-        out.sn = txt.slice(idx21 + 2, idx10);
-      } else if (idx21 !== -1) {
-        out.sn = txt.slice(idx21 + 2);
-      }
+  if (sflt === 'all' || sflt === 'device') {
+    rows = rows.concat((CACHE.device || []).map(x => ({...x, _type:'device'})));
+  }
+  if (sflt === 'all' || sflt === 'mask') {
+    rows = rows.concat((CACHE.mask || []).map(x => ({...x, _type:'mask'})));
+  }
+  if (sflt === 'all' || sflt === 'accessory') {
+    rows = rows.concat((CACHE.accessory || []).map(x => ({...x, _type:'accessory'})));
+  }
 
-      if (idx10 !== -1) {
-        out.lot = txt.slice(idx10 + 2);
-      }
+  if (!rows.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-ic">📦</div><div>ไม่พบข้อมูลสต็อก</div></div>`;
+    return;
+  }
 
-      // ถ้าสแกนเป็น GTIN ตรง ๆ 14 หลัก
-      if (!out.gtin && /^\d{14}$/.test(txt)) {
-        out.gtin = txt;
-      }
+  list.innerHTML = rows.map(itemToCard).join('');
+}
 
-      // ถ้าไม่ใช่ GS1 แต่อาจเป็น serial ตรง ๆ
-      if (!out.sn && /^[A-Z0-9-]{6,}$/.test(txt) && !txt.startsWith("01")) {
-        out.sn = txt;
-      }
+function itemToCard(x) {
+  const type = x._type;
+  const cls = type;
+  const badgeClass = type === 'device' ? 'bd2' : type === 'mask' ? 'bm' : 'ba';
+  const badgeText = type === 'device' ? 'เครื่อง' : type === 'mask' ? 'หน้ากาก' : 'อุปกรณ์เสริม';
 
-      return out;
-    }
+  let details = '';
+  if (type === 'device') {
+    details = `
+      <dt>แบรนด์</dt><dd>${esc(x['Brand'] || '-')}</dd>
+      <dt>รุ่น</dt><dd>${esc(x['Model'] || '-')}</dd>
+      <dt>SN</dt><dd>${esc(x['Serial Number (SN)'] || '-')}</dd>
+      <dt>LOT</dt><dd>${esc(x['LOT Number'] || '-')}</dd>
+      <dt>GTIN</dt><dd>${esc(x['GTIN / Barcode'] || '-')}</dd>
+      <dt>ที่อยู่</dt><dd>${esc(x['Location / Hospital'] || '-')}</dd>
+    `;
+  } else if (type === 'mask') {
+    details = `
+      <dt>แบรนด์</dt><dd>${esc(x['Brand'] || '-')}</dd>
+      <dt>รุ่น</dt><dd>${esc(x['Model'] || '-')}</dd>
+      <dt>Size</dt><dd>${esc(x['Size'] || '-')}</dd>
+      <dt>REF</dt><dd>${esc(x['REF'] || '-')}</dd>
+      <dt>LOT</dt><dd>${esc(x['LOT Number'] || '-')}</dd>
+      <dt>GTIN</dt><dd>${esc(x['GTIN / Barcode'] || '-')}</dd>
+      <dt>Qty</dt><dd>${esc(x['Qty'] || '0')}</dd>
+    `;
+  } else {
+    details = `
+      <dt>แบรนด์</dt><dd>${esc(x['Brand'] || '-')}</dd>
+      <dt>LOT</dt><dd>${esc(x['LOT Number'] || '-')}</dd>
+      <dt>GTIN</dt><dd>${esc(x['GTIN / Barcode'] || '-')}</dd>
+      <dt>Qty</dt><dd>${esc(x['Qty'] || '0')}</dd>
+      <dt>ที่อยู่</dt><dd>${esc(x['Location'] || '-')}</dd>
+    `;
+  }
 
-    function lookupByGTIN(gtin) {
-      if (!gtin) return null;
-      return PRODUCT_DB[gtin] || null;
-    }
+  return `
+    <div class="ic ${cls}">
+      <div class="ic-top">
+        <div class="ic-nm">${esc(x['Product Name'] || '-')}</div>
+        <span class="bg ${badgeClass}">${badgeText}</span>
+      </div>
 
-    function fallbackProduct(cleaned) {
-      // fallback ชั่วคราว เฉพาะกรณีไม่มี GTIN แต่ยังอยากให้บางตัวเข้าได้
-      if (cleaned.includes("CADL") || cleaned.includes("R20") || cleaned.includes("R-20I")) {
-        return {
-          type: "device",
-          name: "Beyond R-20i BPAP",
-          brand: "Hunan Beyond",
-          model: "R-20i"
-        };
-      }
+      <dl class="ic-kv">${details}</dl>
 
-      if (cleaned.includes("NM5")) {
-        return {
-          type: "mask",
-          name: "Beyond EaseFit NM5",
-          brand: "Hunan Beyond",
-          model: "EaseFit NM5"
-        };
-      }
+      <div class="ic-ft">
+        <div class="ic-meta">แถวชีต: ${esc(x._sheetRow || '-')}</div>
+        <button class="btn-co" onclick='quickOut(${jsonAttr({
+          type,
+          sheetRow: x._sheetRow,
+          name: x["Product Name"] || '',
+          brand: x["Brand"] || '',
+          model: x["Model"] || '',
+          size: x["Size"] || '',
+          ref: x["REF"] || '',
+          sn: x["Serial Number (SN)"] || '',
+          lot: x["LOT Number"] || '',
+          gtin: x["GTIN / Barcode"] || ''
+        })})'>จ่ายออก</button>
+      </div>
+    </div>
+  `;
+}
 
-      return null;
-    }
+function renderHist() {
+  const list = document.getElementById('hiList');
+  const rows = CACHE.history || [];
 
-    function buildPayload(decodedText) {
-      const cleaned = cleanScanText(decodedText);
-      const gs1 = parseGS1(cleaned);
+  if (!rows.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-ic">📋</div><div>ยังไม่มีประวัติ</div></div>`;
+    return;
+  }
 
-      let product = lookupByGTIN(gs1.gtin);
+  list.innerHTML = rows.map(h => {
+    const isIn = (h['Action'] || '') === 'Stock In';
+    const icon = isIn ? '⬇️' : '⬆️';
+    const cls = isIn ? 'in' : 'out';
 
-      if (!product) {
-        product = fallbackProduct(cleaned);
-      }
+    return `
+      <div class="hi">
+        <div class="hd ${cls}">${icon}</div>
+        <div style="flex:1">
+          <div class="hn">${esc(h['Product Name'] || '-')}</div>
+          <div class="hm">
+            ${esc(h['Type'] || '-')} · ${esc(h['Brand'] || '-')} · ${esc(h['Serial / LOT'] || '-')}
+            ${h['Location / Recipient'] ? '<br>ปลายทาง: ' + esc(h['Location / Recipient']) : ''}
+            ${h['Recorded By'] ? '<br>โดย: ' + esc(h['Recorded By']) : ''}
+            ${h['Note'] ? '<br>หมายเหตุ: ' + esc(h['Note']) : ''}
+          </div>
+        </div>
+        <div class="ht">${esc(h['Date'] || '-')}<br>${esc(h['Time'] || '-')}</div>
+      </div>
+    `;
+  }).join('');
+}
 
-      if (!product) {
-        return {
-          error: "UNKNOWN_GTIN",
-          cleaned,
-          gs1
-        };
-      }
+function sumQty(arr, key) {
+  return (arr || []).reduce((sum, x) => sum + Number(x[key] || 0), 0);
+}
 
-      const payload = {
-        action: "in",
-        type: product.type,
-        name: product.name,
-        brand: product.brand,
-        model: product.model,
-        sn: "",
-        lot: "",
-        gtin: gs1.gtin || "",
-        mfgDate: gs1.mfgDate || "",
-        expiry: "",
-        location: "scan",
-        user: "github-scanner",
-        note: cleaned
-      };
+function setPill(mode) {
+  const p = document.getElementById('pill');
+  p.className = 'pill ' + (mode || '');
+  if (mode === 'ok') p.textContent = '● พร้อมใช้งาน';
+  else if (mode === 'busy') p.textContent = '● กำลังทำงาน';
+  else if (mode === 'err') p.textContent = '● ผิดพลาด';
+  else p.textContent = '● Sheet';
+}
 
-      if (product.type === "device") {
-        payload.sn = gs1.sn || cleaned;
-        payload.lot = gs1.lot || "";
-      } else {
-        payload.lot = gs1.lot || cleaned;
-      }
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast on ' + (type || '');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = 'toast', 2200);
+}
 
-      return {
-        payload,
-        gs1,
-        product,
-        cleaned
-      };
-    }
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
 
-    async function sendToSheet(decodedText) {
-      const built = buildPayload(decodedText);
+function jsonAttr(obj) {
+  return JSON.stringify(obj)
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
-      if (built.error === "UNKNOWN_GTIN") {
-        setResult(
-          '<div class="warn">ไม่รู้จักสินค้า</div>' +
-          '<div class="row"><b>Raw:</b> ' + escapeHtml(built.cleaned) + '</div>' +
-          '<div class="row"><b>GTIN:</b> ' + escapeHtml(built.gs1.gtin || "-") + '</div>' +
-          '<div class="row"><b>SN:</b> ' + escapeHtml(built.gs1.sn || "-") + '</div>' +
-          '<div class="row"><b>LOT:</b> ' + escapeHtml(built.gs1.lot || "-") + '</div>' +
-          '<div class="row"><b>MFG:</b> ' + escapeHtml(built.gs1.mfgDate || "-") + '</div>' +
-          '<hr>' +
-          '<div class="muted">เพิ่ม GTIN นี้เข้า PRODUCT_DB ก่อน แล้วค่อยสแกนใหม่</div>'
-        );
-        return;
-      }
+function exportCSV() {
+  const rows = CACHE.history || [];
+  if (!rows.length) return toast('ยังไม่มีประวัติให้ export', 'warn');
 
-      const { payload, gs1, product, cleaned } = built;
+  const headers = ['Date','Time','Type','Product Name','Brand','Serial / LOT','Action','Location / Recipient','Recorded By','Note','Reference'];
+  const csv = [
+    headers.join(','),
+    ...rows.map(r => headers.map(h => csvCell(r[h] || '')).join(','))
+  ].join('\n');
 
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8"
-        },
-        body: JSON.stringify(payload)
-      });
+  const blob = new Blob(['\ufeff' + csv], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'skyline-history.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
 
-      const txt = await res.text();
-
-      setResult(
-        '<div class="ok">สแกนได้สำเร็จ</div>' +
-        '<div class="row"><b>Raw:</b> ' + escapeHtml(cleaned) + '</div>' +
-        '<div class="row"><b>ประเภท:</b> ' + escapeHtml(product.type) + '</div>' +
-        '<div class="row"><b>ชื่อ:</b> ' + escapeHtml(product.name) + '</div>' +
-        '<div class="row"><b>แบรนด์:</b> ' + escapeHtml(product.brand) + '</div>' +
-        '<div class="row"><b>รุ่น:</b> ' + escapeHtml(product.model) + '</div>' +
-        '<div class="row"><b>GTIN:</b> ' + escapeHtml(gs1.gtin || "-") + '</div>' +
-        '<div class="row"><b>SN:</b> ' + escapeHtml(payload.sn || "-") + '</div>' +
-        '<div class="row"><b>LOT:</b> ' + escapeHtml(payload.lot || "-") + '</div>' +
-        '<div class="row"><b>MFG:</b> ' + escapeHtml(gs1.mfgDate || "-") + '</div>' +
-        '<hr>' +
-        '<div>ส่งเข้า Apps Script แล้ว</div>' +
-        '<div class="muted">' + escapeHtml(txt) + '</div>' +
-        '<div style="margin-top:10px;color:#0a7a35;"><b>กด "เปิดกล้อง" เพื่อสแกนชิ้นถัดไป</b></div>'
-      );
-    }
-
-    async function handleDecoded(decodedText) {
-      const cleaned = cleanScanText(decodedText);
-      if (!cleaned) return;
-
-      const now = Date.now();
-
-      if (isProcessing) return;
-      if (cleaned === lastText && (now - lastScanAt) < DUPLICATE_WINDOW_MS) return;
-
-      isProcessing = true;
-      lastText = cleaned;
-      lastScanAt = now;
-
-      try {
-        if (navigator.vibrate) navigator.vibrate(100);
-
-        if (scanner) {
-          try {
-            await scanner.stop();
-            await scanner.clear();
-          } catch (e) {}
-          scanner = null;
-        }
-
-        setResult('<div class="ok">กำลังตรวจ GTIN...</div><br>' + escapeHtml(cleaned));
-        await sendToSheet(cleaned);
-
-      } catch (e) {
-        setResult(
-          '<div class="err">สแกนได้ แต่ส่งเข้า Apps Script ไม่สำเร็จ</div>' +
-          '<div class="row"><b>Raw:</b> ' + escapeHtml(cleaned) + '</div>' +
-          '<hr>' +
-          '<div class="muted">' + escapeHtml(e) + '</div>'
-        );
-      } finally {
-        isProcessing = false;
-      }
-    }
-
-    async function startScan() {
-      if (scanner || isProcessing) return;
-
-      scanner = new Html5Qrcode("reader");
-
-      try {
-        await scanner.start(
-          { facingMode: "environment" },
-          {
-            fps: 10,
-            qrbox: { width: 280, height: 280 },
-            rememberLastUsedCamera: true,
-            aspectRatio: 1.0
-          },
-          async function(decodedText) {
-            await handleDecoded(decodedText);
-          },
-          function() {}
-        );
-      } catch (err) {
-        setResult('<div class="err">เปิดกล้องไม่ได้</div><br>' + escapeHtml(err));
-        scanner = null;
-      }
-    }
-
-    async function stopScan() {
-      if (!scanner) return;
-      try {
-        await scanner.stop();
-        await scanner.clear();
-      } catch (e) {}
-      scanner = null;
-      setResult("หยุดกล้องแล้ว");
-    }
-  </script>
+function csvCell(v) {
+  const s = String(v == null ? '' : v).replace(/"/g, '""');
+  return `"${s}"`;
+}
+</script>
 </body>
 </html>
