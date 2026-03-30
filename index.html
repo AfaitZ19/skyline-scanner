@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
 <title>Skyline Medical — Stock</title>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
@@ -15,11 +15,12 @@
   --bd:#e0e0e0;--bg:#f0f2f5;--tx:#1a1a1a;--mu:#6b7280;
   --ra:10px;--sh:0 2px 8px rgba(0,0,0,.08)
 }
-body{font-family:'Sarabun',-apple-system,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+body{font-family:'Sarabun',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
 .sc{display:none;min-height:100vh;flex-direction:column}
 .sc.on{display:flex}
+
 #scSetup{background:var(--B);align-items:center;justify-content:center;padding:20px}
-.card{background:#fff;border-radius:16px;padding:26px 22px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.card{background:#fff;border-radius:16px;padding:26px 22px;width:100%;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,.18)}
 .logo-row{display:flex;align-items:center;gap:11px;margin-bottom:20px}
 .logo-sq{width:46px;height:46px;background:var(--B);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .logo-sq svg{width:26px;height:26px;fill:#fff}
@@ -36,13 +37,15 @@ body{font-family:'Sarabun',-apple-system,sans-serif;background:var(--bg);color:v
 .bar-l{display:flex;align-items:center;gap:7px}
 .bar-title{font-size:15px;font-weight:700}
 .pill{font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,.15);white-space:nowrap}
-.pill.ok{background:rgba(26,122,74,.45)}.pill.busy{background:rgba(255,200,0,.3)}.pill.err{background:rgba(185,46,46,.45)}
+.pill.ok{background:rgba(26,122,74,.45)}
+.pill.busy{background:rgba(255,200,0,.3)}
+.pill.err{background:rgba(185,46,46,.45)}
 .bar-r{display:flex;align-items:center;gap:6px}
 .usr{font-size:11px;background:rgba(255,255,255,.2);padding:3px 9px;border-radius:20px}
 .btn-xs{background:rgba(255,255,255,.15);border:none;color:#fff;padding:5px 10px;border-radius:7px;font-size:11px;cursor:pointer;font-family:inherit}
 
 .main{flex:1;padding:13px;overflow-y:auto}
-@media(min-width:500px){.main{max-width:560px;margin:0 auto}}
+@media(min-width:500px){.main{max-width:640px;margin:0 auto}}
 
 .tabs{display:flex;background:#fff;border-radius:var(--ra);padding:4px;box-shadow:var(--sh);margin-bottom:13px;gap:2px}
 .tab{flex:1;padding:8px 3px;text-align:center;font-size:11px;border-radius:7px;cursor:pointer;color:var(--mu);font-weight:500;border:none;background:none;font-family:inherit}
@@ -52,6 +55,7 @@ body{font-family:'Sarabun',-apple-system,sans-serif;background:var(--bg);color:v
 .mbtn{flex:1;padding:10px;border-radius:var(--ra);border:1.5px solid var(--bd);background:#fff;font-size:13px;font-family:inherit;cursor:pointer;font-weight:600;color:var(--mu)}
 .mbtn.in.on{border-color:var(--G);background:var(--GL);color:var(--G)}
 .mbtn.out.on{border-color:var(--R);background:var(--RL);color:var(--R)}
+
 .sbox{background:#fff;border-radius:var(--ra);padding:13px;box-shadow:var(--sh);margin-bottom:11px}
 .shint{text-align:center;font-size:12px;color:var(--mu);margin-bottom:7px;display:flex;align-items:center;justify-content:center;gap:5px}
 .dot{width:7px;height:7px;border-radius:50%;background:#e53;animation:p 1s infinite;flex-shrink:0}
@@ -72,7 +76,8 @@ body{font-family:'Sarabun',-apple-system,sans-serif;background:var(--bg);color:v
 .rbox.on{display:block}
 .rhd{font-size:12px;font-weight:700;color:var(--B);margin-bottom:7px}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:3px 9px;font-size:12px}
-.kv dt{color:var(--mu)}.kv dd{font-weight:600;word-break:break-all}
+.kv dt{color:var(--mu)}
+.kv dd{font-weight:600;word-break:break-all}
 
 .flbl{font-size:12px;font-weight:700;color:#444;display:block;margin-bottom:4px}
 .fsel,.finp{width:100%;padding:10px 11px;border:1.5px solid var(--bd);border-radius:var(--ra);font-size:13px;font-family:inherit;background:#fff;outline:none;margin-bottom:9px}
@@ -93,20 +98,26 @@ body{font-family:'Sarabun',-apple-system,sans-serif;background:var(--bg);color:v
 .chip.on{background:var(--B);color:#fff;border-color:var(--B)}
 
 .ic{background:#fff;border-radius:var(--ra);padding:11px 12px;box-shadow:var(--sh);margin-bottom:8px;border-left:4px solid var(--bd)}
-.ic.device{border-left-color:var(--B)}.ic.mask{border-left-color:var(--G)}.ic.accessory{border-left-color:var(--A)}
+.ic.device{border-left-color:var(--B)}
+.ic.mask{border-left-color:var(--G)}
+.ic.accessory{border-left-color:var(--A)}
 .ic-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:5px}
 .ic-nm{font-size:13px;font-weight:700;flex:1;padding-right:7px}
 .bg{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;white-space:nowrap}
-.bd2{background:var(--BL);color:var(--B)}.bm{background:var(--GL);color:var(--G)}.ba{background:var(--AL);color:var(--A)}
+.bd2{background:var(--BL);color:var(--B)}
+.bm{background:var(--GL);color:var(--G)}
+.ba{background:var(--AL);color:var(--A)}
 .ic-kv{display:grid;grid-template-columns:auto 1fr;gap:2px 7px;font-size:11px}
-.ic-kv dt{color:var(--mu)}.ic-kv dd{font-weight:500;word-break:break-all}
-.ic-ft{display:flex;align-items:center;justify-content:space-between;margin-top:7px;padding-top:7px;border-top:1px solid var(--bd)}
+.ic-kv dt{color:var(--mu)}
+.ic-kv dd{font-weight:500;word-break:break-all}
+.ic-ft{display:flex;align-items:center;justify-content:space-between;margin-top:7px;padding-top:7px;border-top:1px solid var(--bd);gap:10px}
 .ic-meta{font-size:10px;color:var(--mu)}
 .btn-co{background:var(--RL);color:var(--R);border:1px solid #f0a0a0;border-radius:7px;padding:4px 9px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
 
 .hi{background:#fff;border-radius:8px;padding:9px 11px;margin-bottom:6px;display:flex;align-items:flex-start;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
 .hd{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
-.hd.in{background:var(--GL)}.hd.out{background:var(--RL)}
+.hd.in{background:var(--GL)}
+.hd.out{background:var(--RL)}
 .hn{font-size:12px;font-weight:600}
 .hm{font-size:10px;color:var(--mu);margin-top:1px}
 .ht{font-size:10px;color:var(--mu);margin-left:auto;text-align:right;white-space:nowrap;flex-shrink:0}
@@ -123,7 +134,11 @@ body{font-family:'Sarabun',-apple-system,sans-serif;background:var(--bg);color:v
 .empty{text-align:center;padding:36px 20px;color:var(--mu)}
 .empty-ic{font-size:36px;margin-bottom:8px}
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:22px;font-size:12px;z-index:9999;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;max-width:92vw;text-align:center}
-.toast.on{opacity:1}.toast.ok{background:var(--G)}.toast.err{background:var(--R)}.toast.warn{background:var(--A)}
+.toast.on{opacity:1}
+.toast.ok{background:var(--G)}
+.toast.err{background:var(--R)}
+.toast.warn{background:var(--A)}
+.small{font-size:11px;color:var(--mu)}
 </style>
 </head>
 <body>
@@ -131,19 +146,29 @@ body{font-family:'Sarabun',-apple-system,sans-serif;background:var(--bg);color:v
 <div id="scSetup" class="sc on">
   <div class="card">
     <div class="logo-row">
-      <div class="logo-sq"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg></div>
-      <div><h1>Skyline Medical</h1><p>ระบบสต็อก — เชื่อมต่อ Google Sheets</p></div>
+      <div class="logo-sq">
+        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+      </div>
+      <div>
+        <h1>Skyline Medical</h1>
+        <p>ระบบสต็อก — เชื่อมต่อ Google Sheets</p>
+      </div>
     </div>
+
     <div class="err" id="setupErr"></div>
+
     <label class="lbl">Apps Script Web App URL</label>
-    <input class="inp" id="apiUrl" placeholder="https://script.google.com/macros/s/.../exec" type="url">
+    <input class="inp" id="apiUrl" placeholder="https://script.google.com/macros/s/.../exec" type="url" />
     <p class="hint">ได้จาก Google Apps Script → Deploy → Web App → Copy URL</p>
+
     <label class="lbl">ชื่อผู้ใช้ (แสดงในประวัติ)</label>
-    <input class="inp" id="setupUser" placeholder="เช่น stock หรือ admin">
+    <input class="inp" id="setupUser" placeholder="เช่น stock หรือ admin" />
+
     <div style="margin-bottom:9px">
       <label class="lbl">รหัสผ่าน</label>
-      <input class="inp" id="setupPass" type="password" placeholder="รหัสผ่าน" style="margin-bottom:0">
+      <input class="inp" id="setupPass" type="password" placeholder="รหัสผ่าน" style="margin-bottom:0" />
     </div>
+
     <button class="btn-p" onclick="doSetup()">เข้าสู่ระบบ</button>
     <p style="font-size:11px;color:var(--mu);text-align:center;margin-top:8px">รหัสผ่าน: stock=1234 &nbsp;|&nbsp; admin=admin123</p>
   </div>
@@ -177,11 +202,14 @@ body{font-family:'Sarabun',-apple-system,sans-serif;background:var(--bg);color:v
 
       <div class="sbox">
         <div class="shint"><span class="dot"></span>เล็งกล้องที่ QR / Barcode</div>
-        <div class="scan-btn-wrap"><button class="scan-btn" onclick="startScan()">📷 เปิดกล้อง</button></div>
+        <div class="scan-btn-wrap">
+          <button class="scan-btn" onclick="startScan()">📷 เปิดกล้อง</button>
+        </div>
         <div id="reader"></div>
+
         <div class="mtog"><button onclick="toggleM()">ป้อนรหัสด้วยตนเอง</button></div>
         <div class="mform" id="mf">
-          <input type="text" id="mc" placeholder="Barcode / SN / LOT">
+          <input type="text" id="mc" placeholder="Barcode / SN / LOT" />
           <button onclick="procM()">ยืนยัน</button>
         </div>
       </div>
@@ -200,10 +228,14 @@ body{font-family:'Sarabun',-apple-system,sans-serif;background:var(--bg);color:v
         </select>
 
         <label class="flbl" id="locLabel">สถานที่ / โรงพยาบาล</label>
-        <input type="text" class="finp" id="locI" placeholder="คลังสินค้า / รพ...">
+        <input type="text" class="finp" id="locI" placeholder="คลังสินค้า / รพ..." />
 
         <label class="flbl">หมายเหตุ</label>
-        <input type="text" class="finp" id="noteI" placeholder="(ถ้ามี)">
+        <input type="text" class="finp" id="noteI" placeholder="(ถ้ามี)" />
+
+        <div class="small" style="margin:-2px 0 10px">
+          สำหรับ mask ระบบจะพยายามส่ง GTIN + LOT + model + size + ref ให้ครบที่สุด
+        </div>
 
         <div class="arow">
           <button class="bin" id="bIn" onclick="doAct('in')">✅ รับเข้า</button>
@@ -266,10 +298,22 @@ body{font-family:'Sarabun',-apple-system,sans-serif;background:var(--bg);color:v
 
 <script>
 const USERS = { stock:'1234', admin:'admin123' };
+
 let API_URL  = localStorage.getItem('skl_api') || '';
 let CUR_USER = '';
-let MODE = 'in', LAST = null, scanner = null, scanOn = false, sflt = 'all';
-let CACHE = { device:[], mask:[], accessory:[], history:[] };
+let MODE = 'in';
+let LAST = null;
+let scanner = null;
+let scanOn = false;
+let sflt = 'all';
+
+let CACHE = {
+  device: [],
+  mask: [],
+  accessory: [],
+  history: []
+};
+
 let IS_PROCESSING = false;
 let LAST_SCAN_TEXT = '';
 let LAST_SCAN_TIME = 0;
@@ -280,15 +324,18 @@ window.onload = () => {
   updateModeUI();
 };
 
+/* =========================
+   SETUP / AUTH
+========================= */
 async function doSetup() {
   const url  = document.getElementById('apiUrl').value.trim();
   const user = document.getElementById('setupUser').value.trim();
   const pass = document.getElementById('setupPass').value;
   const errEl = document.getElementById('setupErr');
 
-  if (!url) { showSetupErr('กรุณาใส่ Apps Script URL'); return; }
-  if (!user) { showSetupErr('กรุณาใส่ชื่อผู้ใช้'); return; }
-  if (!USERS[user] || USERS[user] !== pass) { showSetupErr('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'); return; }
+  if (!url) return showSetupErr('กรุณาใส่ Apps Script URL');
+  if (!user) return showSetupErr('กรุณาใส่ชื่อผู้ใช้');
+  if (!USERS[user] || USERS[user] !== pass) return showSetupErr('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
 
   errEl.style.display = 'none';
   setPill('busy');
@@ -296,19 +343,20 @@ async function doSetup() {
   try {
     const r = await apiFetch(url + '?action=ping');
     if (!r.ok) throw new Error(r.error || 'API error');
-  } catch(e) {
+  } catch (e) {
     showSetupErr('เชื่อมต่อ API ไม่ได้: ' + e.message);
     setPill('err');
     return;
   }
 
-  API_URL  = url;
+  API_URL = url;
   CUR_USER = user;
   localStorage.setItem('skl_api', url);
 
   document.getElementById('scSetup').classList.remove('on');
   document.getElementById('scApp').classList.add('on');
   document.getElementById('usrBadge').textContent = user;
+
   toast('✅ เชื่อมต่อ Sheet สำเร็จ', 'ok');
   setPill('ok');
   await loadAll();
@@ -335,13 +383,16 @@ function showSetupErr(msg) {
   errEl.style.display = 'block';
 }
 
+/* =========================
+   API
+========================= */
 async function apiFetch(url) {
   try {
     const r = await fetch(url, { redirect:'follow', mode:'cors' });
-    return r.json();
-  } catch(e) {
+    return await r.json();
+  } catch (e) {
     const r = await fetch(url, { redirect:'follow', credentials:'omit' });
-    return r.json();
+    return await r.json();
   }
 }
 
@@ -353,46 +404,197 @@ async function apiPost(body) {
     redirect: 'follow',
     credentials: 'omit'
   });
+
   const txt = await r.text();
-  try { return JSON.parse(txt); }
-  catch(e) { throw new Error('Response not JSON: ' + txt.slice(0,120)); }
+  try {
+    return JSON.parse(txt);
+  } catch (e) {
+    throw new Error('Response not JSON: ' + txt.slice(0, 200));
+  }
 }
 
+/* =========================
+   LOAD / RENDER
+========================= */
 async function loadAll() {
   setPill('busy');
   try {
     const [stock, hist] = await Promise.all([
       apiFetch(API_URL + '?action=stock'),
-      apiFetch(API_URL + '?action=history&n=200'),
+      apiFetch(API_URL + '?action=history&n=200')
     ]);
 
-    if (!stock.ok) throw new Error(stock.error);
+    if (!stock.ok) throw new Error(stock.error || 'โหลด stock ไม่สำเร็จ');
 
-    CACHE.device    = stock.device || [];
-    CACHE.mask      = stock.mask || [];
+    CACHE.device = stock.device || [];
+    CACHE.mask = stock.mask || [];
     CACHE.accessory = stock.accessory || [];
-    CACHE.history   = (hist && hist.history) ? hist.history : [];
+    CACHE.history = (hist && hist.history) ? hist.history : [];
 
+    updateStats();
     renderStock();
     renderHist();
-    updateStats();
 
     setPill('ok');
     document.getElementById('connTxt').innerHTML =
       `✅ เชื่อมต่อสำเร็จ<br>เครื่อง ${CACHE.device.length} | หน้ากาก ${sumQty(CACHE.mask, 'Qty')} | เสริม ${sumQty(CACHE.accessory, 'Qty')}<br>อัปเดต: ${new Date().toLocaleTimeString('th-TH')}`;
-  } catch(e) {
+  } catch (e) {
     setPill('err');
     document.getElementById('connTxt').textContent = '❌ ' + e.message;
     toast('โหลดข้อมูลไม่ได้: ' + e.message, 'err');
   }
 }
 
-function sumQty(arr, key) {
-  return (arr || []).reduce(function(sum, x){
-    return sum + Number(x[key] || 0);
-  }, 0);
+function updateStats() {
+  document.getElementById('sDv').textContent = CACHE.device.length;
+  document.getElementById('sMk').textContent = sumQty(CACHE.mask, 'Qty');
+  document.getElementById('sAc').textContent = sumQty(CACHE.accessory, 'Qty');
 }
 
+function renderStock() {
+  const list = document.getElementById('stList');
+  let rows = [];
+
+  if (sflt === 'all' || sflt === 'device') {
+    rows = rows.concat((CACHE.device || []).map(x => ({...x, _type:'device'})));
+  }
+  if (sflt === 'all' || sflt === 'mask') {
+    rows = rows.concat((CACHE.mask || []).map(x => ({...x, _type:'mask'})));
+  }
+  if (sflt === 'all' || sflt === 'accessory') {
+    rows = rows.concat((CACHE.accessory || []).map(x => ({...x, _type:'accessory'})));
+  }
+
+  if (!rows.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-ic">📦</div><div>ไม่พบข้อมูลสต็อก</div></div>`;
+    return;
+  }
+
+  list.innerHTML = rows.map(itemToCard).join('');
+}
+
+function itemToCard(x) {
+  const type = x._type;
+  const cls = type;
+  const badgeClass = type === 'device' ? 'bd2' : type === 'mask' ? 'bm' : 'ba';
+  const badgeText = type === 'device' ? 'เครื่อง' : type === 'mask' ? 'หน้ากาก' : 'อุปกรณ์เสริม';
+
+  let details = '';
+  if (type === 'device') {
+    details = `
+      <dt>แบรนด์</dt><dd>${esc(x['Brand'] || '-')}</dd>
+      <dt>รุ่น</dt><dd>${esc(x['Model'] || '-')}</dd>
+      <dt>SN</dt><dd>${esc(x['Serial Number (SN)'] || '-')}</dd>
+      <dt>LOT</dt><dd>${esc(x['LOT Number'] || '-')}</dd>
+      <dt>GTIN</dt><dd>${esc(x['GTIN / Barcode'] || '-')}</dd>
+      <dt>ที่อยู่</dt><dd>${esc(x['Location / Hospital'] || '-')}</dd>
+    `;
+  } else if (type === 'mask') {
+    details = `
+      <dt>แบรนด์</dt><dd>${esc(x['Brand'] || '-')}</dd>
+      <dt>รุ่น</dt><dd>${esc(x['Model'] || '-')}</dd>
+      <dt>Size</dt><dd>${esc(x['Size'] || '-')}</dd>
+      <dt>REF</dt><dd>${esc(x['REF'] || '-')}</dd>
+      <dt>LOT</dt><dd>${esc(x['LOT Number'] || '-')}</dd>
+      <dt>GTIN</dt><dd>${esc(x['GTIN / Barcode'] || '-')}</dd>
+      <dt>Qty</dt><dd>${esc(x['Qty'] || '0')}</dd>
+    `;
+  } else {
+    details = `
+      <dt>แบรนด์</dt><dd>${esc(x['Brand'] || '-')}</dd>
+      <dt>LOT</dt><dd>${esc(x['LOT Number'] || '-')}</dd>
+      <dt>GTIN</dt><dd>${esc(x['GTIN / Barcode'] || '-')}</dd>
+      <dt>Qty</dt><dd>${esc(x['Qty'] || '0')}</dd>
+      <dt>ที่อยู่</dt><dd>${esc(x['Location'] || '-')}</dd>
+    `;
+  }
+
+  return `
+    <div class="ic ${cls}">
+      <div class="ic-top">
+        <div class="ic-nm">${esc(x['Product Name'] || '-')}</div>
+        <span class="bg ${badgeClass}">${badgeText}</span>
+      </div>
+
+      <dl class="ic-kv">${details}</dl>
+
+      <div class="ic-ft">
+        <div class="ic-meta">
+          แถวชีต: ${esc(x._sheetRow || '-')}
+        </div>
+        <button class="btn-co" onclick='quickOut(${jsonAttr({
+          type,
+          sheetRow: x._sheetRow,
+          name: x["Product Name"] || '',
+          brand: x["Brand"] || '',
+          model: x["Model"] || '',
+          size: x["Size"] || '',
+          ref: x["REF"] || '',
+          sn: x["Serial Number (SN)"] || '',
+          lot: x["LOT Number"] || '',
+          gtin: x["GTIN / Barcode"] || ''
+        })})'>จ่ายออก</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderHist() {
+  const list = document.getElementById('hiList');
+  const rows = CACHE.history || [];
+
+  if (!rows.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-ic">📋</div><div>ยังไม่มีประวัติ</div></div>`;
+    return;
+  }
+
+  list.innerHTML = rows.map(h => {
+    const isIn = (h['Action'] || '') === 'Stock In';
+    const icon = isIn ? '⬇️' : '⬆️';
+    const cls = isIn ? 'in' : 'out';
+
+    return `
+      <div class="hi">
+        <div class="hd ${cls}">${icon}</div>
+        <div style="flex:1">
+          <div class="hn">${esc(h['Product Name'] || '-')}</div>
+          <div class="hm">
+            ${esc(h['Type'] || '-')} · ${esc(h['Brand'] || '-')} · ${esc(h['Serial / LOT'] || '-')}
+            ${h['Location / Recipient'] ? '<br>ปลายทาง: ' + esc(h['Location / Recipient']) : ''}
+            ${h['Recorded By'] ? '<br>โดย: ' + esc(h['Recorded By']) : ''}
+            ${h['Note'] ? '<br>หมายเหตุ: ' + esc(h['Note']) : ''}
+          </div>
+        </div>
+        <div class="ht">
+          ${esc(h['Date'] || '-')}<br>${esc(h['Time'] || '-')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* =========================
+   TABS / FILTER
+========================= */
+function goTab(tab) {
+  ['scan','stock','hist','cfg'].forEach(id => {
+    document.getElementById('v-' + id).style.display = (id === tab ? '' : 'none');
+    document.getElementById('t-' + id).classList.toggle('on', id === tab);
+  });
+
+  if (tab !== 'scan') stopScannerOnly();
+}
+
+function flt(type, el) {
+  sflt = type;
+  document.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
+  if (el) el.classList.add('on');
+  renderStock();
+}
+
+/* =========================
+   SCAN / PARSE / LOOKUP
+========================= */
 function cleanText(raw) {
   return String(raw || '')
     .replace(/[^\x20-\x7E]/g, '')
@@ -402,7 +604,9 @@ function cleanText(raw) {
 }
 
 function fd(s) {
-  return s.length === 6 ? '20' + s.slice(0,2) + '-' + s.slice(2,4) + '-' + s.slice(4,6) : s;
+  return s && s.length === 6
+    ? '20' + s.slice(0,2) + '-' + s.slice(2,4) + '-' + s.slice(4,6)
+    : s || '';
 }
 
 function parseCode(raw) {
@@ -413,9 +617,19 @@ function parseCode(raw) {
   if (IS_PROCESSING) return;
   if (cleaned === LAST_SCAN_TEXT && (now - LAST_SCAN_TIME) < DUP_MS) return;
 
-  const d = { raw: cleaned, sn:'', lot:'', gtin:'', mfgDate:'', expiry:'', ref:'' };
+  const d = {
+    raw: cleaned,
+    sn: '',
+    lot: '',
+    gtin: '',
+    mfgDate: '',
+    expiry: '',
+    ref: '',
+    size: '',
+    p: null
+  };
 
-  const re = /\(01\)([\d]+)|\(10\)([\w\d-]+)|\(21\)([\w\d-]+)|\(11\)([\d]+)|\(17\)([\d]+)/g;
+  const re = /\(01\)([\d]+)|\(10\)([\w\d\-\/]+)|\(21\)([\w\d\-\/]+)|\(11\)([\d]+)|\(17\)([\d]+)/g;
   let m;
   while ((m = re.exec(cleaned)) !== null) {
     if (m[1]) d.gtin = m[1];
@@ -453,6 +667,10 @@ function parseCode(raw) {
   if (!d.sn && !d.lot && cleaned.length > 4 && !cleaned.startsWith('(')) d.sn = cleaned;
 
   d.p = lookup(d);
+  if (d.p) {
+    d.size = d.p.size || '';
+    d.ref = d.p.ref || '';
+  }
 
   LAST = d;
   LAST_SCAN_TEXT = cleaned;
@@ -465,32 +683,33 @@ function parseCode(raw) {
 
 function lookup(d) {
   const db = [
-    { gtin:'04719893347081', name:'APEX iX Auto + Humidifier',  brand:'APEX Medical',        type:'device',    model:'iX Auto + Humidifier' },
-    { gtin:'04713025000400', name:'APEX iX Auto',               brand:'APEX Medical',        type:'device',    model:'iX Auto' },
-    { gtin:'04713025000226', name:'APEX iX Auto Humidifier',    brand:'APEX Medical',        type:'device',    model:'iX Auto Humidifier' },
-    { gtin:'04713025000073', name:'APEX XT Auto',               brand:'APEX Medical',        type:'device',    model:'XT Auto' },
+    { gtin:'04719893347081', name:'APEX iX Auto + Humidifier', brand:'APEX Medical', type:'device', model:'iX Auto + Humidifier' },
+    { gtin:'04713025000400', name:'APEX iX Auto', brand:'APEX Medical', type:'device', model:'iX Auto' },
+    { gtin:'04713025000226', name:'APEX iX Auto Humidifier', brand:'APEX Medical', type:'device', model:'iX Auto Humidifier' },
+    { gtin:'04713025000073', name:'APEX XT Auto', brand:'APEX Medical', type:'device', model:'XT Auto' },
 
-    { gtin:'04719893347319', name:'WiZARD 510 Nasal Mask',      brand:'Wellell',             type:'mask',      model:'WiZARD 510' },
-    { gtin:'00606959006829', name:'Philips Wisp Mask Fabric',   brand:'Philips Respironics', type:'mask',      model:'Wisp' },
+    { gtin:'04719893347319', name:'WiZARD 510 Nasal Mask', brand:'Wellell', type:'mask', model:'WiZARD 510' },
+    { gtin:'00606959006829', name:'Philips Wisp Mask Fabric', brand:'Philips Respironics', type:'mask', model:'Wisp' },
 
-    { gtin:'6958949938318', name:'Beyond EaseFit NM5',          brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM5',  size:'M', ref:'78066' },
-    { gtin:'6958949993856', name:'Beyond EaseFit NM6A',         brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM6A', size:'M', ref:'78091' },
-    { gtin:'6958949993849', name:'Beyond EaseFit NM6',          brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM6',  size:'L', ref:'78084' },
-    { gtin:'6958949993837', name:'Beyond EaseFit NM5A',         brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM5A', size:'L', ref:'78072' },
-    { gtin:'958949937694',  name:'Beyond EaseFit NM5A',         brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM5A', size:'M', ref:'PT78044' },
-    { gtin:'6958949993769', name:'Beyond EaseFit NM5A',         brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM5A', size:'M', ref:'PT78044' },
-    { gtin:'06958949932057', name:'Breathing Tube HP1',         brand:'Hunan Beyond',        type:'accessory', model:'HP1', ref:'74001EU' },
+    { gtin:'6958949938318', name:'Beyond EaseFit NM5', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM5', size:'M', ref:'78066' },
+    { gtin:'6958949993856', name:'Beyond EaseFit NM6A', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM6A', size:'M', ref:'78091' },
+    { gtin:'6958949993849', name:'Beyond EaseFit NM6', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM6', size:'L', ref:'78084' },
+    { gtin:'6958949993837', name:'Beyond EaseFit NM5A', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM5A', size:'L', ref:'78072' },
+    { gtin:'958949937694', name:'Beyond EaseFit NM5A', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM5A', size:'M', ref:'PT78044' },
+    { gtin:'6958949993769', name:'Beyond EaseFit NM5A', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM5A', size:'M', ref:'PT78044' },
 
-    { sn_exact:'26B17',  name:'APEX Unknown Device 26B17',  brand:'APEX Medical', type:'device', model:'Unknown' },
+    { gtin:'06958949932057', name:'Breathing Tube HP1', brand:'Hunan Beyond', type:'accessory', model:'HP1', ref:'74001EU' },
+
+    { sn_exact:'26B17', name:'APEX Unknown Device 26B17', brand:'APEX Medical', type:'device', model:'Unknown' },
     { sn_exact:'25J100', name:'APEX Unknown Device 25J100', brand:'APEX Medical', type:'device', model:'Unknown' },
-    { sn_exact:'26B39',  name:'APEX Unknown Device 26B39',  brand:'APEX Medical', type:'device', model:'Unknown' },
+    { sn_exact:'26B39', name:'APEX Unknown Device 26B39', brand:'APEX Medical', type:'device', model:'Unknown' },
 
-    { sn_pfx:'CADL',         name:'Beyond R-20i CPAP',          brand:'Hunan Beyond',        type:'device',    model:'R-20i' },
-    { lot_pfx:'BY-C2506NM5', name:'Beyond EaseFit NM5',         brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM5' },
-    { lot_pfx:'BY-C2312PMI', name:'Beyond EaseFit PMI',         brand:'Hunan Beyond',        type:'mask',      model:'EaseFit PMI' },
-    { lot_pfx:'BY-B2501S',   name:'Beyond SpO2 Kits',           brand:'Hunan Beyond',        type:'accessory', model:'SpO2 Kit' },
-    { lot_pfx:'BY-C2601R20', name:'Beyond R-20i BPAP',          brand:'Hunan Beyond',        type:'device',    model:'R-20i' },
-    { lot_pfx:'BY-C2601R20I',name:'Beyond R-20i BPAP',          brand:'Hunan Beyond',        type:'device',    model:'R-20i' }
+    { sn_pfx:'CADL', name:'Beyond R-20i CPAP', brand:'Hunan Beyond', type:'device', model:'R-20i' },
+    { lot_pfx:'BY-C2506NM5', name:'Beyond EaseFit NM5', brand:'Hunan Beyond', type:'mask', model:'EaseFit NM5' },
+    { lot_pfx:'BY-C2312PMI', name:'Beyond EaseFit PMI', brand:'Hunan Beyond', type:'mask', model:'EaseFit PMI' },
+    { lot_pfx:'BY-B2501S', name:'Beyond SpO2 Kits', brand:'Hunan Beyond', type:'accessory', model:'SpO2 Kit' },
+    { lot_pfx:'BY-C2601R20', name:'Beyond R-20i BPAP', brand:'Hunan Beyond', type:'device', model:'R-20i' },
+    { lot_pfx:'BY-C2601R20I', name:'Beyond R-20i BPAP', brand:'Hunan Beyond', type:'device', model:'R-20i' }
   ];
 
   for (const p of db) {
@@ -499,6 +718,7 @@ function lookup(d) {
     if (p.sn_pfx && d.sn && d.sn.startsWith(p.sn_pfx)) return p;
     if (p.lot_pfx && d.lot && d.lot.startsWith(p.lot_pfx)) return p;
   }
+
   return null;
 }
 
@@ -514,7 +734,7 @@ async function startScan() {
       () => {}
     );
     scanOn = true;
-  } catch(e) {
+  } catch (e) {
     document.getElementById('reader').innerHTML =
       '<p style="text-align:center;padding:18px;color:#aaa;font-size:12px">ไม่สามารถเข้าถึงกล้อง<br>ป้อนรหัสด้วยตนเองแทน</p>';
   }
@@ -522,26 +742,11 @@ async function startScan() {
 
 function stopScannerOnly() {
   if (scanner) {
-    try { scanner.stop(); } catch(e) {}
-    try { scanner.clear(); } catch(e) {}
+    try { scanner.stop(); } catch (e) {}
+    try { scanner.clear(); } catch (e) {}
   }
   scanner = null;
   scanOn = false;
-}
-
-function setMode(m) {
-  MODE = m;
-  updateModeUI();
-}
-
-function updateModeUI() {
-  const isIn = MODE === 'in';
-  document.getElementById('mIn').classList.toggle('on', isIn);
-  document.getElementById('mOut').classList.toggle('on', !isIn);
-  document.getElementById('bIn').style.display  = isIn ? 'block' : 'none';
-  document.getElementById('bOut').style.display = isIn ? 'none' : 'block';
-  document.getElementById('locLabel').textContent = isIn ? 'สถานที่ / โรงพยาบาล' : 'จ่ายให้เซลล์คนไหน';
-  document.getElementById('locI').placeholder = isIn ? 'คลังสินค้า / รพ...' : 'เช่น Mint, Ploy, ฝ่ายขายเหนือ';
 }
 
 function toggleM() {
@@ -561,20 +766,26 @@ function procM() {
 
 function showResult(d) {
   const rows = [];
+
   if (d.p) {
     rows.push(['สินค้า', d.p.name]);
     rows.push(['แบรนด์', d.p.brand]);
     rows.push(['ประเภท', d.p.type]);
     rows.push(['รุ่น', d.p.model || '-']);
+    if (d.p.size) rows.push(['Size', d.p.size]);
+    if (d.p.ref) rows.push(['REF', d.p.ref]);
   }
+
   if (d.sn) rows.push(['SN', d.sn]);
   if (d.lot) rows.push(['LOT', d.lot]);
   if (d.gtin) rows.push(['GTIN', d.gtin]);
   if (d.mfgDate) rows.push(['วันผลิต', d.mfgDate]);
+  if (d.expiry) rows.push(['วันหมดอายุ', d.expiry]);
   if (!rows.length) rows.push(['รหัส', d.raw]);
 
-  document.getElementById('rkv').innerHTML = rows.map(([k,v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('');
+  document.getElementById('rkv').innerHTML = rows.map(([k,v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');
   if (d.p) document.getElementById('iType').value = d.p.type;
+
   document.getElementById('rbox').classList.add('on');
   document.getElementById('sf').style.display = 'block';
   document.getElementById('locI').value = '';
@@ -593,24 +804,38 @@ function resetScan() {
   document.getElementById('reader').innerHTML = '';
 }
 
+/* =========================
+   ACTIONS
+========================= */
+function setMode(m) {
+  MODE = m;
+  updateModeUI();
+}
+
+function updateModeUI() {
+  const isIn = MODE === 'in';
+  document.getElementById('mIn').classList.toggle('on', isIn);
+  document.getElementById('mOut').classList.toggle('on', !isIn);
+  document.getElementById('bIn').style.display = isIn ? 'block' : 'none';
+  document.getElementById('bOut').style.display = isIn ? 'none' : 'block';
+  document.getElementById('locLabel').textContent = isIn ? 'สถานที่ / โรงพยาบาล' : 'จ่ายให้เซลล์คนไหน';
+  document.getElementById('locI').placeholder = isIn ? 'คลังสินค้า / รพ...' : 'เช่น Mint, Ploy, ฝ่ายขายเหนือ';
+}
+
 async function doAct(action) {
   if (!LAST) return;
   if (IS_PROCESSING) return;
-  IS_PROCESSING = true;
 
   const type = document.getElementById('iType').value;
   const loc  = document.getElementById('locI').value.trim();
   const note = document.getElementById('noteI').value.trim();
-  const name = LAST.p?.name || LAST.sn || LAST.raw;
-  const brand = LAST.p?.brand || '';
-  const model = LAST.p?.model || '';
 
   if (action === 'out' && !loc) {
     toast('กรุณาระบุว่าเอาไปให้เซลล์คนไหน', 'warn');
-    IS_PROCESSING = false;
     return;
   }
 
+  IS_PROCESSING = true;
   document.getElementById('bIn').disabled = true;
   document.getElementById('bOut').disabled = true;
   setPill('busy');
@@ -619,16 +844,16 @@ async function doAct(action) {
     const payload = {
       action,
       type,
-      name,
-      brand,
-      model,
-      size: LAST.p?.size || '',
-      ref: LAST.p?.ref || '',
-      sn: LAST.sn,
-      lot: LAST.lot,
-      gtin: LAST.gtin,
-      mfgDate: LAST.mfgDate,
-      expiry: LAST.expiry,
+      name: LAST.p?.name || LAST.sn || LAST.lot || LAST.raw,
+      brand: LAST.p?.brand || '',
+      model: LAST.p?.model || '',
+      size: LAST.p?.size || LAST.size || '',
+      ref: LAST.p?.ref || LAST.ref || '',
+      sn: LAST.sn || '',
+      lot: LAST.lot || '',
+      gtin: LAST.gtin || '',
+      mfgDate: LAST.mfgDate || '',
+      expiry: LAST.expiry || '',
       location: loc,
       note,
       user: CUR_USER
@@ -637,186 +862,111 @@ async function doAct(action) {
     const res = await apiPost(payload);
     if (!res.ok) throw new Error(res.error || 'API error');
 
-    toast(action === 'in' ? '✅ บันทึกรับเข้าแล้ว' : `🔺 จ่ายออกให้ ${loc} แล้ว`, 'ok');
-    setPill('ok');
+    toast(action === 'in' ? '✅ รับเข้าเรียบร้อย' : '✅ จ่ายออกเรียบร้อย', 'ok');
     resetScan();
     await loadAll();
-  } catch(e) {
+  } catch (e) {
+    toast('บันทึกไม่สำเร็จ: ' + e.message, 'err');
     setPill('err');
-    toast('❌ ' + e.message, 'err');
   } finally {
+    IS_PROCESSING = false;
     document.getElementById('bIn').disabled = false;
     document.getElementById('bOut').disabled = false;
+  }
+}
+
+async function quickOut(item) {
+  const who = prompt('จ่ายให้เซลล์คนไหน');
+  if (!who) return;
+
+  if (IS_PROCESSING) return;
+  IS_PROCESSING = true;
+  setPill('busy');
+
+  try {
+    const payload = {
+      action: 'out_by_id',
+      type: item.type,
+      sheetRow: item.sheetRow,
+      name: item.name || '',
+      brand: item.brand || '',
+      model: item.model || '',
+      size: item.size || '',
+      ref: item.ref || '',
+      sn: item.sn || '',
+      lot: item.lot || '',
+      gtin: item.gtin || '',
+      location: who,
+      user: CUR_USER,
+      note: ''
+    };
+
+    const res = await apiPost(payload);
+    if (!res.ok) throw new Error(res.error || 'API error');
+
+    toast('✅ จ่ายออกเรียบร้อย', 'ok');
+    await loadAll();
+  } catch (e) {
+    toast('จ่ายออกไม่สำเร็จ: ' + e.message, 'err');
+    setPill('err');
+  } finally {
     IS_PROCESSING = false;
   }
 }
 
-function quickOut(item) {
-  const who = prompt('จ่ายให้เซลล์คนไหน?');
-  if (!who) return;
-
-  const payload = {
-    action: 'out',
-    type: item._type,
-    name: item['Product Name'] || '',
-    brand: item['Brand'] || '',
-    model: item['Model'] || '',
-    sn: item['Serial Number (SN)'] || '',
-    lot: item['LOT Number'] || '',
-    gtin: item['GTIN / Barcode'] || '',
-    location: who,
-    note: 'quick out from stock card',
-    user: CUR_USER
-  };
-
-  setPill('busy');
-  apiPost(payload).then(function(res){
-    if (!res.ok) throw new Error(res.error || 'API error');
-    toast('🔺 จ่ายออกให้ ' + who + ' แล้ว', 'ok');
-    setPill('ok');
-    return loadAll();
-  }).catch(function(e){
-    setPill('err');
-    toast('❌ ' + e.message, 'err');
-  });
-}
-
-function updateStats() {
-  document.getElementById('sDv').textContent = CACHE.device.length || 0;
-  document.getElementById('sMk').textContent = sumQty(CACHE.mask, 'Qty') || 0;
-  document.getElementById('sAc').textContent = sumQty(CACHE.accessory, 'Qty') || 0;
-}
-
-function flt(type, el) {
-  sflt = type;
-  document.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
-  if (el) el.classList.add('on');
-  renderStock();
-}
-
-function renderStock() {
-  const list = document.getElementById('stList');
-  const items = [
-    ...CACHE.device.map(x => ({...x, _type:'device'})),
-    ...CACHE.mask.map(x => ({...x, _type:'mask'})),
-    ...CACHE.accessory.map(x => ({...x, _type:'accessory'}))
-  ].filter(x => sflt === 'all' ? true : x._type === sflt);
-
-  if (!items.length) {
-    list.innerHTML = `<div class="empty"><div class="empty-ic">📦</div><div>ยังไม่มีข้อมูล</div></div>`;
-    return;
-  }
-
-  list.innerHTML = items.map((it, idx) => {
-    const badgeCls = it._type === 'device' ? 'bd2' : it._type === 'mask' ? 'bm' : 'ba';
-    const lot = it['LOT Number'] || '-';
-    const gtin = it['GTIN / Barcode'] || '-';
-    const sn = it['Serial Number (SN)'] || '-';
-    const qty = it['Qty'] || 1;
-    const loc = it['Location'] || it['Location / Hospital'] || '-';
-    const encoded = encodeURIComponent(JSON.stringify(it));
-
-    return `
-      <div class="ic ${it._type}">
-        <div class="ic-top">
-          <div class="ic-nm">${escapeHtml(it['Product Name'] || '-')}</div>
-          <div class="bg ${badgeCls}">${escapeHtml(it._type)}</div>
-        </div>
-        <dl class="ic-kv">
-          <dt>Brand</dt><dd>${escapeHtml(it['Brand'] || '-')}</dd>
-          <dt>Model</dt><dd>${escapeHtml(it['Model'] || '-')}</dd>
-          <dt>SN</dt><dd>${escapeHtml(sn)}</dd>
-          <dt>LOT</dt><dd>${escapeHtml(lot)}</dd>
-          <dt>GTIN</dt><dd>${escapeHtml(gtin)}</dd>
-          <dt>Qty</dt><dd>${escapeHtml(qty)}</dd>
-          <dt>Location</dt><dd>${escapeHtml(loc)}</dd>
-        </dl>
-        <div class="ic-ft">
-          <div class="ic-meta">#${idx + 1}</div>
-          <button class="btn-co" onclick='quickOut(${decodeURIComponent(encoded) ? JSON.stringify(it).replace(/'/g, "&apos;") : "{}"})'>🔺 จ่ายออก</button>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  // แก้ onclick หลัง render เพื่อกัน quote พัง
-  const buttons = list.querySelectorAll('.btn-co');
-  buttons.forEach((btn, i) => {
-    btn.onclick = function() { quickOut(items[i]); };
-  });
-}
-
-function renderHist() {
-  const list = document.getElementById('hiList');
-  const items = CACHE.history || [];
-
-  if (!items.length) {
-    list.innerHTML = `<div class="empty"><div class="empty-ic">📋</div><div>ยังไม่มีประวัติ</div></div>`;
-    return;
-  }
-
-  list.innerHTML = items.map(it => {
-    const action = String(it['Action'] || '');
-    const isIn = action === 'Stock In';
-    const icon = isIn ? '⬇️' : '⬆️';
-    const hdCls = isIn ? 'in' : 'out';
-    return `
-      <div class="hi">
-        <div class="hd ${hdCls}">${icon}</div>
-        <div>
-          <div class="hn">${escapeHtml(it['Product Name'] || '-')}</div>
-          <div class="hm">${escapeHtml(it['Action'] || '-')} • ${escapeHtml(it['Location / Recipient'] || '-')} • ${escapeHtml(it['Recorded By'] || '-')}</div>
-        </div>
-        <div class="ht">${escapeHtml(it['Date'] || '-')}<br>${escapeHtml(it['Time'] || '-')}</div>
-      </div>
-    `;
-  }).join('');
-}
-
-function goTab(tab) {
-  ['scan','stock','hist','cfg'].forEach(k => {
-    document.getElementById('t-' + k).classList.toggle('on', k === tab);
-    document.getElementById('v-' + k).style.display = (k === tab ? 'block' : 'none');
-  });
+/* =========================
+   UTIL
+========================= */
+function sumQty(arr, key) {
+  return (arr || []).reduce((sum, x) => sum + Number(x[key] || 0), 0);
 }
 
 function setPill(mode) {
-  const el = document.getElementById('pill');
-  el.className = 'pill ' + mode;
-  el.textContent = mode === 'ok' ? '● Connected' : mode === 'busy' ? '● Working' : mode === 'err' ? '● Error' : '● Sheet';
+  const p = document.getElementById('pill');
+  p.className = 'pill ' + (mode || '');
+  if (mode === 'ok') p.textContent = '● พร้อมใช้งาน';
+  else if (mode === 'busy') p.textContent = '● กำลังทำงาน';
+  else if (mode === 'err') p.textContent = '● ผิดพลาด';
+  else p.textContent = '● Sheet';
 }
 
-function toast(msg, type='ok') {
+function toast(msg, type) {
   const el = document.getElementById('toast');
   el.textContent = msg;
-  el.className = 'toast on ' + type;
-  clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(() => { el.className = 'toast'; }, 2200);
+  el.className = 'toast on ' + (type || '');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = 'toast', 2200);
 }
 
-function escapeHtml(str) {
-  return String(str || '')
+function esc(s) {
+  return String(s == null ? '' : s)
     .replace(/&/g,'&amp;')
     .replace(/</g,'&lt;')
     .replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#039;');
+    .replace(/'/g,'&#39;');
+}
+
+function jsonAttr(obj) {
+  return JSON.stringify(obj)
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function exportCSV() {
-  const items = CACHE.history || [];
-  if (!items.length) {
+  const rows = CACHE.history || [];
+  if (!rows.length) {
     toast('ยังไม่มีประวัติให้ export', 'warn');
     return;
   }
 
-  const headers = Object.keys(items[0]);
+  const headers = ['Date','Time','Type','Product Name','Brand','Serial / LOT','Action','Location / Recipient','Recorded By','Note','Reference'];
   const csv = [
     headers.join(','),
-    ...items.map(row => headers.map(h => `"${String(row[h] || '').replace(/"/g, '""')}"`).join(','))
+    ...rows.map(r => headers.map(h => csvCell(r[h] || '')).join(','))
   ].join('\n');
 
-  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const blob = new Blob(['\ufeff' + csv], { type:'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -825,6 +975,11 @@ function exportCSV() {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
+
+function csvCell(v) {
+  const s = String(v == null ? '' : v).replace(/"/g, '""');
+  return `"${s}"`;
 }
 </script>
 </body>
