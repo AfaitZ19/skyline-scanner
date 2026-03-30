@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Skyline Scanner</title>
+  <title>Skyline Scanner GTIN</title>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     body{
@@ -51,23 +51,70 @@
     }
     .ok{color:#0a7a35;font-weight:bold;}
     .err{color:#b00020;font-weight:bold;}
+    .warn{color:#a06a00;font-weight:bold;}
     .muted{color:#666;font-size:13px;}
     .row{margin-bottom:4px;}
   </style>
 </head>
 <body>
 
-  <h1>📦 Skyline Scanner</h1>
+  <h1>📦 Skyline Scanner GTIN</h1>
 
   <button class="btn" onclick="startScan()">📷 เปิดกล้อง</button>
   <button class="btn" onclick="stopScan()">⛔ หยุด</button>
 
   <div id="reader"></div>
-
   <div id="result">รอการสแกน...</div>
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwXPMj_QZdNFbKSaL69xqXoH7iXVaZeO5hRgWMTbYoSXm1T-AYMrvajOAPtt9evg40sfA/exec";
+
+    // ===== ฐานข้อมูล GTIN =====
+    // เพิ่มของจริงของมึงเข้าไปเรื่อย ๆ ตรงนี้
+    const PRODUCT_DB = {
+      "04719893347081": {
+        type: "device",
+        name: "APEX iX Auto + Humidifier",
+        brand: "APEX Medical",
+        model: "iX Auto + Humidifier"
+      },
+      "04713025000400": {
+        type: "device",
+        name: "APEX iX Auto",
+        brand: "APEX Medical",
+        model: "iX Auto"
+      },
+      "04713025000226": {
+        type: "device",
+        name: "APEX iX Auto Humidifier",
+        brand: "APEX Medical",
+        model: "iX Auto Humidifier"
+      },
+      "04713025000073": {
+        type: "device",
+        name: "APEX XT Auto",
+        brand: "APEX Medical",
+        model: "XT Auto"
+      },
+      "04719893347319": {
+        type: "mask",
+        name: "WiZARD 510 Nasal Mask",
+        brand: "Wellell",
+        model: "WiZARD 510"
+      },
+      "00606959006829": {
+        type: "mask",
+        name: "Philips Wisp Mask Fabric",
+        brand: "Philips Respironics",
+        model: "Wisp"
+      },
+      "06958949938318": {
+        type: "mask",
+        name: "Beyond EaseFit NM5",
+        brand: "Hunan Beyond",
+        model: "EaseFit NM5"
+      }
+    };
 
     let scanner = null;
     let lastText = "";
@@ -109,9 +156,9 @@
 
       if (!txt) return out;
 
-      const idx01 = txt.indexOf("01");
-      if (idx01 !== -1 && txt.length >= idx01 + 16) {
-        const maybeGTIN = txt.slice(idx01 + 2, idx01 + 16);
+      // รองรับกรณีสแกนได้เป็น GS1 string เช่น 01069589499383181125062410BY...
+      if (txt.startsWith("01") && txt.length >= 16) {
+        const maybeGTIN = txt.slice(2, 16);
         if (/^\d{14}$/.test(maybeGTIN)) out.gtin = maybeGTIN;
       }
 
@@ -136,6 +183,12 @@
         out.lot = txt.slice(idx10 + 2);
       }
 
+      // ถ้าสแกนเป็น GTIN ตรง ๆ 14 หลัก
+      if (!out.gtin && /^\d{14}$/.test(txt)) {
+        out.gtin = txt;
+      }
+
+      // ถ้าไม่ใช่ GS1 แต่อาจเป็น serial ตรง ๆ
       if (!out.sn && /^[A-Z0-9-]{6,}$/.test(txt) && !txt.startsWith("01")) {
         out.sn = txt;
       }
@@ -143,63 +196,58 @@
       return out;
     }
 
-    function detectProduct(text) {
-      const t = cleanScanText(text);
+    function lookupByGTIN(gtin) {
+      if (!gtin) return null;
+      return PRODUCT_DB[gtin] || null;
+    }
 
-      if (t.includes("NM5")) {
-        return { type: "mask", name: "Beyond EaseFit NM5", brand: "Hunan Beyond", model: "EaseFit NM5" };
+    function fallbackProduct(cleaned) {
+      // fallback ชั่วคราว เฉพาะกรณีไม่มี GTIN แต่ยังอยากให้บางตัวเข้าได้
+      if (cleaned.includes("CADL") || cleaned.includes("R20") || cleaned.includes("R-20I")) {
+        return {
+          type: "device",
+          name: "Beyond R-20i BPAP",
+          brand: "Hunan Beyond",
+          model: "R-20i"
+        };
       }
 
-      if (t.includes("PMI")) {
-        return { type: "mask", name: "Beyond EaseFit PMI", brand: "Hunan Beyond", model: "EaseFit PMI" };
+      if (cleaned.includes("NM5")) {
+        return {
+          type: "mask",
+          name: "Beyond EaseFit NM5",
+          brand: "Hunan Beyond",
+          model: "EaseFit NM5"
+        };
       }
 
-      if (t.includes("WISP") || t.includes("606959006829") || t.includes("00606959006829")) {
-        return { type: "mask", name: "Philips Wisp Mask Fabric", brand: "Philips Respironics", model: "Wisp" };
-      }
-
-      if (t.includes("WIZARD") || t.includes("04719893347319") || t.includes("SM06001")) {
-        return { type: "mask", name: "WiZARD 510 Nasal Mask", brand: "Wellell", model: "WiZARD 510" };
-      }
-
-      if (t.includes("SPO2") || t.includes("RESHOPE") || t.includes("RESFREE")) {
-        return { type: "accessory", name: "SpO2 Kit", brand: "Hunan Beyond", model: "ResFree / ResHope" };
-      }
-
-      if (t.includes("CADL") || t.includes("R20") || t.includes("R-20I")) {
-        return { type: "device", name: "Beyond R-20i CPAP", brand: "Hunan Beyond", model: "R-20i" };
-      }
-
-      if (t.includes("XTAUTO") || t.includes("XT AUTO") || t.includes("04713025000073")) {
-        return { type: "device", name: "APEX XT Auto", brand: "APEX Medical", model: "XT Auto" };
-      }
-
-      if (t.includes("04719893347081")) {
-        return { type: "device", name: "APEX iX Auto + Humidifier", brand: "APEX Medical", model: "iX Auto + Humidifier" };
-      }
-
-      if (t.includes("04713025000400")) {
-        return { type: "device", name: "APEX iX Auto", brand: "APEX Medical", model: "iX Auto" };
-      }
-
-      if (t.includes("04713025000226")) {
-        return { type: "device", name: "APEX iX Auto Humidifier", brand: "APEX Medical", model: "iX Auto Humidifier" };
-      }
-
-      return { type: "device", name: "Auto Scan", brand: "Auto", model: "Auto" };
+      return null;
     }
 
     function buildPayload(decodedText) {
       const cleaned = cleanScanText(decodedText);
       const gs1 = parseGS1(cleaned);
-      const p = detectProduct(cleaned);
+
+      let product = lookupByGTIN(gs1.gtin);
+
+      if (!product) {
+        product = fallbackProduct(cleaned);
+      }
+
+      if (!product) {
+        return {
+          error: "UNKNOWN_GTIN",
+          cleaned,
+          gs1
+        };
+      }
 
       const payload = {
         action: "in",
-        type: p.type,
-        name: p.name,
-        brand: p.brand,
-        model: p.model,
+        type: product.type,
+        name: product.name,
+        brand: product.brand,
+        model: product.model,
         sn: "",
         lot: "",
         gtin: gs1.gtin || "",
@@ -210,18 +258,39 @@
         note: cleaned
       };
 
-      if (p.type === "device") {
+      if (product.type === "device") {
         payload.sn = gs1.sn || cleaned;
         payload.lot = gs1.lot || "";
       } else {
         payload.lot = gs1.lot || cleaned;
       }
 
-      return { payload, gs1, product: p, cleaned };
+      return {
+        payload,
+        gs1,
+        product,
+        cleaned
+      };
     }
 
     async function sendToSheet(decodedText) {
-      const { payload, gs1, product, cleaned } = buildPayload(decodedText);
+      const built = buildPayload(decodedText);
+
+      if (built.error === "UNKNOWN_GTIN") {
+        setResult(
+          '<div class="warn">ไม่รู้จักสินค้า</div>' +
+          '<div class="row"><b>Raw:</b> ' + escapeHtml(built.cleaned) + '</div>' +
+          '<div class="row"><b>GTIN:</b> ' + escapeHtml(built.gs1.gtin || "-") + '</div>' +
+          '<div class="row"><b>SN:</b> ' + escapeHtml(built.gs1.sn || "-") + '</div>' +
+          '<div class="row"><b>LOT:</b> ' + escapeHtml(built.gs1.lot || "-") + '</div>' +
+          '<div class="row"><b>MFG:</b> ' + escapeHtml(built.gs1.mfgDate || "-") + '</div>' +
+          '<hr>' +
+          '<div class="muted">เพิ่ม GTIN นี้เข้า PRODUCT_DB ก่อน แล้วค่อยสแกนใหม่</div>'
+        );
+        return;
+      }
+
+      const { payload, gs1, product, cleaned } = built;
 
       const res = await fetch(API_URL, {
         method: "POST",
@@ -258,10 +327,7 @@
       const now = Date.now();
 
       if (isProcessing) return;
-
-      if (cleaned === lastText && (now - lastScanAt) < DUPLICATE_WINDOW_MS) {
-        return;
-      }
+      if (cleaned === lastText && (now - lastScanAt) < DUPLICATE_WINDOW_MS) return;
 
       isProcessing = true;
       lastText = cleaned;
@@ -278,13 +344,13 @@
           scanner = null;
         }
 
-        setResult('<div class="ok">กำลังส่งข้อมูล...</div><br>' + escapeHtml(cleaned));
+        setResult('<div class="ok">กำลังตรวจ GTIN...</div><br>' + escapeHtml(cleaned));
         await sendToSheet(cleaned);
 
       } catch (e) {
         setResult(
           '<div class="err">สแกนได้ แต่ส่งเข้า Apps Script ไม่สำเร็จ</div>' +
-          '<div><b>Raw:</b> ' + escapeHtml(cleaned) + '</div>' +
+          '<div class="row"><b>Raw:</b> ' + escapeHtml(cleaned) + '</div>' +
           '<hr>' +
           '<div class="muted">' + escapeHtml(e) + '</div>'
         );
