@@ -473,14 +473,19 @@ function lookup(d) {
     { gtin:'04719893347319', name:'WiZARD 510 Nasal Mask',      brand:'Wellell',             type:'mask',      model:'WiZARD 510' },
     { gtin:'00606959006829', name:'Philips Wisp Mask Fabric',   brand:'Philips Respironics', type:'mask',      model:'Wisp' },
 
-    { gtin:'06958949938318', name:'Beyond EaseFit NM5',         brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM5' },
-    { gtin:'06958949993856', name:'Beyond EaseFit NM6A',        brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM6A' },
-    { gtin:'06958949993849', name:'Beyond EaseFit NM6',         brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM6' },
-    { gtin:'06958949993837', name:'Beyond EaseFit NM5A',        brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM5A' },
-    { gtin:'06958949993769', name:'Beyond EaseFit NM5A',        brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM5A' },
-    { gtin:'06958949932057', name:'Breathing Tube HP1',         brand:'Hunan Beyond',        type:'accessory', model:'HP1' },
+    { gtin:'06958949938318', name:'Beyond EaseFit NM5',         brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM5',  size:'M', ref:'78066' },
+    { gtin:'06958949993856', name:'Beyond EaseFit NM6A',        brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM6A', size:'M', ref:'78091' },
+    { gtin:'06958949993849', name:'Beyond EaseFit NM6',         brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM6',  size:'L', ref:'78084' },
+    { gtin:'06958949993837', name:'Beyond EaseFit NM5A',        brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM5A', size:'L', ref:'78072' },
+    { gtin:'6958949937694',  name:'Beyond EaseFit NM5A',        brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM5A', size:'M', ref:'PT78044' },
+    { gtin:'06958949993769', name:'Beyond EaseFit NM5A',        brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM5A', size:'M', ref:'PT78044' },
+    { gtin:'06958949932057', name:'Breathing Tube HP1',         brand:'Hunan Beyond',        type:'accessory', model:'HP1', ref:'74001EU' },
 
-    { sn_pfx:'CADL',         name:'Beyond R-20i BPAP',          brand:'Hunan Beyond',        type:'device',    model:'R-20i' },
+    { sn_exact:'26B17',  name:'APEX Unknown Device 26B17',  brand:'APEX Medical', type:'device', model:'Unknown' },
+    { sn_exact:'25J100', name:'APEX Unknown Device 25J100', brand:'APEX Medical', type:'device', model:'Unknown' },
+    { sn_exact:'26B39',  name:'APEX Unknown Device 26B39',  brand:'APEX Medical', type:'device', model:'Unknown' },
+
+    { sn_pfx:'CADL',         name:'Beyond R-20i CPAP',          brand:'Hunan Beyond',        type:'device',    model:'R-20i' },
     { lot_pfx:'BY-C2506NM5', name:'Beyond EaseFit NM5',         brand:'Hunan Beyond',        type:'mask',      model:'EaseFit NM5' },
     { lot_pfx:'BY-C2312PMI', name:'Beyond EaseFit PMI',         brand:'Hunan Beyond',        type:'mask',      model:'EaseFit PMI' },
     { lot_pfx:'BY-B2501S',   name:'Beyond SpO2 Kits',           brand:'Hunan Beyond',        type:'accessory', model:'SpO2 Kit' },
@@ -490,6 +495,7 @@ function lookup(d) {
 
   for (const p of db) {
     if (p.gtin && d.gtin === p.gtin) return p;
+    if (p.sn_exact && d.sn === p.sn_exact) return p;
     if (p.sn_pfx && d.sn && d.sn.startsWith(p.sn_pfx)) return p;
     if (p.lot_pfx && d.lot && d.lot.startsWith(p.lot_pfx)) return p;
   }
@@ -605,10 +611,6 @@ async function doAct(action) {
     return;
   }
 
-  if (action === 'in' && !loc && type !== 'mask') {
-    // mask ไม่จำเป็นต้องกรอก location ถ้าไม่อยากใช้
-  }
-
   document.getElementById('bIn').disabled = true;
   document.getElementById('bOut').disabled = true;
   setPill('busy');
@@ -620,6 +622,8 @@ async function doAct(action) {
       name,
       brand,
       model,
+      size: LAST.p?.size || '',
+      ref: LAST.p?.ref || '',
       sn: LAST.sn,
       lot: LAST.lot,
       gtin: LAST.gtin,
